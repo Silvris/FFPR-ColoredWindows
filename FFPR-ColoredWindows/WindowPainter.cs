@@ -2,18 +2,32 @@
 using BepInEx.Logging;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FFPR_ColoredWindows.IL2CPP;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using UnhollowerRuntimeLib;
+using UnityEngine.InputSystem;
 
 namespace FFPR_ColoredWindows.Main
 {
-    public sealed class WindowPainter : MonoBehaviour
+    public sealed class WindowPainter
     {
 
         public ResourceManager _resourceManager;
+        public List<int> tintedTextures;
+        public static String[] textureList =
+        {
+            "UI_Common_WindowFrame01",
+            "UI_Common_WindowFrame02",
+            "UI_Common_WindowFrame03",
+            "UI_Common_WindowFrame04"//no 05 as it is a speaker box
+        };
+        private String _filePath = "";
         private Boolean _windowLoaded = false;
 
         public WindowPainter()
@@ -89,11 +103,43 @@ namespace FFPR_ColoredWindows.Main
             }
             return newTex;
         }
-        public Texture2D tintCursor(Color tint)
+        public void tintSprite(Sprite source, Texture2D tex, Color tint)
         {
-            Texture2D cursor = _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_Cursor01"].Cast<Texture2D>();
-            return tintTexture(cursor, tint);
+            Texture2D texture = source.texture;
+            texture = tintTexture(tex,tint);
         }
+        public static Texture2D ReadTextureFromFile(String fullPath)
+        {
+            Byte[] bytes = File.ReadAllBytes(fullPath);
+            Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            texture.filterMode = FilterMode.Point;
+            if (!ImageConversion.LoadImage(texture, bytes))
+                throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
+            return texture;
+        }
+
+        public bool ProccessColorChanges()
+        {
+            try
+            {
+                List<Object> sprites = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<Sprite>()));
+                List<Object> windowFrame = sprites.FindAll(x => textureList.Contains(x.name));
+                foreach (Object spr in windowFrame)
+                {
+                    //ModComponent.Log.LogInfo(spr.Pointer);
+                    Sprite sprit = Object.FindObjectFromInstanceID(spr.GetInstanceID()).Cast<Sprite>();
+                    //ModComponent.Log.LogInfo(sprit.Pointer);
+                    tintSprite(sprit, ReadTextureFromFile(_filePath + sprit.name + ".png"), new Color(96, 77, 177));
+                }
+                return true;
+            }
+            catch(Exception ex)
+            {
+                ModComponent.Log.LogError($"Unable to tint windows: {ex}");
+                return false;
+            }
+        }
+
         public void Update()
         {
             try
@@ -104,16 +150,17 @@ namespace FFPR_ColoredWindows.Main
                     if (_resourceManager is null)
                         return;
                     //wait for loading to happen
+                    //go ahead and search for our non-addressables
+
+                    Assembly thisone = Assembly.GetExecutingAssembly();
+                    _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
+                    
                     ModComponent.Log.LogInfo($"Waiting for window loading.");
                 }
-                if (_windowLoaded == false)
+                Boolean isPressed = InputManager.GetKeyUp(KeyCode.F6);//todo:make this configurable
+                if (isPressed)
                 {
-                    if (!_resourceManager.CheckLoadAssetCompleted("Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_Cursor01"))
-                    {
-                        return;
-                    }
-                    _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_Cursor01"] = tintCursor(new Color(160, 40, 240));
-                    _windowLoaded = true;
+                    ProccessColorChanges();
                 }
             }
             catch(Exception ex)

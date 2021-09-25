@@ -12,6 +12,7 @@ namespace FFPR_ColoredWindows.IL2CPP
     {
         public static ModComponent Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
+        public Configuration Config { get; private set; }
         [field: NonSerialized]public WindowPainter Painter { get; private set; }
         private Boolean _isDisabled;
         public ModComponent(IntPtr ptr) : base(ptr)
@@ -23,6 +24,7 @@ namespace FFPR_ColoredWindows.IL2CPP
             try
             {
                 Instance = this;
+                Config = new Configuration();
                 Painter = new WindowPainter();
                 Log.LogMessage($"[{nameof(ModComponent)}].{nameof(Awake)}: Processed successfully.");
             }

@@ -12,6 +12,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using UnhollowerRuntimeLib;
 using UnityEngine.InputSystem;
+using HarmonyLib;
 
 namespace FFPR_ColoredWindows.Main
 {
@@ -27,40 +28,33 @@ namespace FFPR_ColoredWindows.Main
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04"//no 05 as it is a speaker box
         };
+        public List<Texture2D> windows;
         private String _filePath = "";
-        private Boolean _windowLoaded = false;
 
         public WindowPainter()
         {
-        }
-
-        public void Awake()
-        {
             try
             {
-                
+                Assembly thisone = Assembly.GetExecutingAssembly();
+                _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
+                windows = new List<Texture2D>();
+                tintedTextures = new List<int>();
+                foreach (String name in textureList)
+                {
+                    windows.Add(ReadTextureFromFile(_filePath + name + ".png"));
+                }
             }
             catch (Exception ex)
             {
-                ModComponent.Log.LogError($"[{nameof(WindowPainter)}.{nameof(Awake)}]: {ex}");
+                ModComponent.Log.LogError($"[{nameof(WindowPainter)}.ctor]: {ex}");
             }
         }
         public void OnDestroy()
         {
             ModComponent.Log.LogInfo($"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
         }
-        public Texture2D tintTexture(Texture2D source, Color tint)
-        {
-            Texture2D newTex = new Texture2D(source.width, source.height);
-            Color[] cols = source.GetPixels();
-            for (int i = 0; i < cols.Length; ++i)
-            {
-                cols[i] = Color.Lerp(cols[i], tint, 0.33f);
-            }
-            newTex.SetPixels(cols);
-            return newTex;
-        }
-        public Texture2D removeTrim(Texture2D source)
+        /* commenting out since they're not needed as of now
+        public Texture2D RemoveTrim(Texture2D source)
         {
             Texture2D newTex = new Texture2D(source.width - 6, source.height - 3);
             Color[] colors = source.GetPixels();
@@ -84,7 +78,7 @@ namespace FFPR_ColoredWindows.Main
             return newTex;
         }
 
-        public Texture2D addTrim(Texture2D source, Color rimColor)
+        public Texture2D AddTrim(Texture2D source, Color rimColor)
         {
             Texture2D newTex = new Texture2D(source.width + 6, source.height + 3);
             for(int i = 0; i < newTex.width; i++)
@@ -102,35 +96,100 @@ namespace FFPR_ColoredWindows.Main
                 }
             }
             return newTex;
-        }
-        public void tintSprite(Sprite source, Texture2D tex, Color tint)
+        }*/
+        public void MakeReadable(Texture2D texture)
         {
-            Texture2D texture = source.texture;
-            texture = tintTexture(tex,tint);
+            try
+            {
+                Traverse trav = Traverse.Create(texture);
+                foreach(string field in trav.Fields())
+                {
+                    ModComponent.Log.LogInfo(field);
+                }
+                
+                trav.Property("isReadable").SetValue(true);
+            }
+            catch (Exception ex)
+            {
+                ModComponent.Log.LogError($"[WindowPainter].[{nameof(MakeReadable)}]:{ex}");
+            }
+        }
+        public void TintTexture(Texture2D texture, Texture2D source, Color tint)
+        {
+            if(!(texture.width == source.width) || !(texture.height == source.height))
+            {
+                return;
+            }
+            Color[] cols = source.GetPixels();
+            for (int i = 0; i < cols.Length; ++i)
+            {
+                cols[i] = Color.Lerp(cols[i], tint, 0.33f);
+            }
+            texture.SetPixels(cols);
         }
         public static Texture2D ReadTextureFromFile(String fullPath)
         {
-            Byte[] bytes = File.ReadAllBytes(fullPath);
-            Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-            texture.filterMode = FilterMode.Point;
-            if (!ImageConversion.LoadImage(texture, bytes))
-                throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
-            return texture;
+            try
+            {
+                Byte[] bytes = File.ReadAllBytes(fullPath);
+                Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                texture.filterMode = FilterMode.Point;
+                if (!ImageConversion.LoadImage(texture, bytes))
+                    throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
+                return texture;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+        public void RecolorKnown()
+        {
+            try
+            {
+                foreach (int instanceID in tintedTextures)
+                {
+                    Texture2D texture = Object.FindObjectFromInstanceID(instanceID).Cast<Texture2D>();
+                    if (!texture.isReadable)
+                    {
+                        MakeReadable(texture);
+                    }
+                    TintTexture(texture, windows.Find(x => x.name == texture.name), ModComponent.Instance.Config.Window.Color);
+                }
+            }
+            catch(Exception ex)
+            {
+                ModComponent.Log.LogError($"[WindowPainter].[{nameof(RecolorKnown)}]:{ex}");
+            }
+        }
+
+
+        public void GatherKnownTextures()
+        {
+            List<Object> textures = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<Texture2D>()));
+            List<Object> windowFrame = textures.FindAll(x => textureList.Contains(x.name));
+            foreach(Object tex in windowFrame)
+            {
+                if (!tintedTextures.Contains(tex.GetInstanceID()))
+                {
+                    Texture2D texture = Object.FindObjectFromInstanceID(tex.GetInstanceID()).Cast<Texture2D>();
+                    //go ahead and tint on the way in
+                    if (!texture.isReadable)
+                    {
+                        MakeReadable(texture);
+                    }
+                    TintTexture(texture, windows.Find(x => x.name == texture.name), ModComponent.Instance.Config.Window.Color);
+                    tintedTextures.Add(texture.GetInstanceID());
+                }
+            }
         }
 
         public bool ProccessColorChanges()
         {
             try
             {
-                List<Object> sprites = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<Sprite>()));
-                List<Object> windowFrame = sprites.FindAll(x => textureList.Contains(x.name));
-                foreach (Object spr in windowFrame)
-                {
-                    //ModComponent.Log.LogInfo(spr.Pointer);
-                    Sprite sprit = Object.FindObjectFromInstanceID(spr.GetInstanceID()).Cast<Sprite>();
-                    //ModComponent.Log.LogInfo(sprit.Pointer);
-                    tintSprite(sprit, ReadTextureFromFile(_filePath + sprit.name + ".png"), new Color(96, 77, 177));
-                }
+                GatherKnownTextures();
                 return true;
             }
             catch(Exception ex)
@@ -150,18 +209,18 @@ namespace FFPR_ColoredWindows.Main
                     if (_resourceManager is null)
                         return;
                     //wait for loading to happen
-                    //go ahead and search for our non-addressables
-
-                    Assembly thisone = Assembly.GetExecutingAssembly();
-                    _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
                     
                     ModComponent.Log.LogInfo($"Waiting for window loading.");
                 }
-                Boolean isPressed = InputManager.GetKeyUp(KeyCode.F6);//todo:make this configurable
+                ModComponent.Log.LogInfo("RefreshKey.Value");
+                Boolean isPressed = InputManager.GetKeyUp(ModComponent.Instance.Config.Window.Refresh);//todo:make this configurable
+                ModComponent.Log.LogInfo("isPressed?");
                 if (isPressed)
                 {
-                    ProccessColorChanges();
+                    ModComponent.Log.LogInfo("isPressed!");
+                    RecolorKnown();
                 }
+                ProccessColorChanges();
             }
             catch(Exception ex)
             {

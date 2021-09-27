@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FFPR_ColoredWindows.IL2CPP;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 using UnhollowerRuntimeLib;
 using UnityEngine.InputSystem;
@@ -23,13 +24,15 @@ namespace FFPR_ColoredWindows.Main
         public List<int> tintedTextures;
         public static String[] textureList =
         {
-            "UI_Common_WindowFrame01",
+            "UI_Common_WindowFrame01", //originally had 1, and may still do it, but tinting with alpha messes up
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04"//no 05 as it is a speaker box
         };
         public List<Texture2D> windows;
         private String _filePath = "";
+
+        public float refreshRate = 0.0f;//an immediate start
 
         public WindowPainter()
         {
@@ -41,8 +44,12 @@ namespace FFPR_ColoredWindows.Main
                 tintedTextures = new List<int>();
                 foreach (String name in textureList)
                 {
-                    windows.Add(ReadTextureFromFile(_filePath + name + ".png"));
+                    Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
+                    tex.hideFlags = HideFlags.HideAndDontSave;
+                    windows.Add(tex);
                 }
+                RecolorTextures();
+                ModComponent.Log.LogInfo("Window Painter initialized.");
             }
             catch (Exception ex)
             {
@@ -97,45 +104,29 @@ namespace FFPR_ColoredWindows.Main
             }
             return newTex;
         }*/
-        public void MakeReadable(Texture2D texture)
+        public void TintTexture(Texture2D source, Color tint)
         {
-            try
-            {
-                Traverse trav = Traverse.Create(texture);
-                foreach(string field in trav.Fields())
-                {
-                    ModComponent.Log.LogInfo(field);
-                }
-                
-                trav.Property("isReadable").SetValue(true);
-            }
-            catch (Exception ex)
-            {
-                ModComponent.Log.LogError($"[WindowPainter].[{nameof(MakeReadable)}]:{ex}");
-            }
-        }
-        public void TintTexture(Texture2D texture, Texture2D source, Color tint)
-        {
-            if(!(texture.width == source.width) || !(texture.height == source.height))
-            {
-                return;
-            }
+            //this is only to be used on textures we generate
             Color[] cols = source.GetPixels();
             for (int i = 0; i < cols.Length; ++i)
             {
+                float a = cols[i].a;
                 cols[i] = Color.Lerp(cols[i], tint, 0.33f);
+                cols[i].a = a;
             }
-            texture.SetPixels(cols);
+            source.SetPixels(cols);
+            source.Apply();
         }
-        public static Texture2D ReadTextureFromFile(String fullPath)
+        public static Texture2D ReadTextureFromFile(String fullPath,String Name)
         {
             try
             {
                 Byte[] bytes = File.ReadAllBytes(fullPath);
-                Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false) { name = Name };
                 texture.filterMode = FilterMode.Point;
                 if (!ImageConversion.LoadImage(texture, bytes))
                     throw new NotSupportedException($"Failed to load texture from file [{fullPath}]");
+                
                 return texture;
             }
             catch(Exception ex)
@@ -144,45 +135,77 @@ namespace FFPR_ColoredWindows.Main
             }
 
         }
-        public void RecolorKnown()
+        public void RecolorTextures()
         {
             try
             {
-                foreach (int instanceID in tintedTextures)
+                foreach (Texture2D tex in windows)
                 {
-                    Texture2D texture = Object.FindObjectFromInstanceID(instanceID).Cast<Texture2D>();
-                    if (!texture.isReadable)
+                    ModComponent.Log.LogInfo(tex.name);
+                    if (tex.name == "UI_Common_WindowFrame01")
                     {
-                        MakeReadable(texture);
+                        ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
+
+                        TintTexture(tex, ModComponent.Instance.Config.Window.BorderColor);
                     }
-                    TintTexture(texture, windows.Find(x => x.name == texture.name), ModComponent.Instance.Config.Window.Color);
+                    else
+                    {
+                        ModComponent.Log.LogInfo("Is Background");
+                        TintTexture(tex, ModComponent.Instance.Config.Window.BackgroundColor);
+                    }
                 }
+
             }
             catch(Exception ex)
             {
-                ModComponent.Log.LogError($"[WindowPainter].[{nameof(RecolorKnown)}]:{ex}");
+                ModComponent.Log.LogError($"[WindowPainter].[{nameof(RecolorTextures)}]:{ex}");
             }
         }
 
 
         public void GatherKnownTextures()
         {
-            List<Object> textures = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<Texture2D>()));
-            List<Object> windowFrame = textures.FindAll(x => textureList.Contains(x.name));
-            foreach(Object tex in windowFrame)
+            try
             {
-                if (!tintedTextures.Contains(tex.GetInstanceID()))
+                List<Object> gobs = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
+                List<Object> images = gobs.FindAll(x => x.name == "image");//this is cursed, don't do this
+                foreach (Object img in images)
                 {
-                    Texture2D texture = Object.FindObjectFromInstanceID(tex.GetInstanceID()).Cast<Texture2D>();
-                    //go ahead and tint on the way in
-                    if (!texture.isReadable)
+                    if (!tintedTextures.Contains(img.GetInstanceID()))
                     {
-                        MakeReadable(texture);
+                        GameObject gob = Object.FindObjectFromInstanceID(img.GetInstanceID()).Cast<GameObject>();
+                        Image image = gob.GetComponent<Image>();
+                        //go ahead and tint on the way in
+                        if(image != null)
+                        {
+                            if(image.sprite != null)
+                            {
+                                if(image.sprite.texture != null)
+                                {
+                                    if (textureList.Contains(image.sprite.texture.name))
+                                    {
+                                        Sprite original = image.sprite;
+                                        //dunno if this will work properly
+                                        image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit,0,SpriteMeshType.Tight,original.border);
+                                        image.sprite.name = original.name;
+                                        Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+                                        tintedTextures.Add(gob.GetInstanceID());
+                                    }
+                                }
+                            }
+
+                        }
+
+
                     }
-                    TintTexture(texture, windows.Find(x => x.name == texture.name), ModComponent.Instance.Config.Window.Color);
-                    tintedTextures.Add(texture.GetInstanceID());
                 }
             }
+            catch(Exception ex)
+            {
+                ModComponent.Log.LogError(ex);
+                throw ex;
+            }
+
         }
 
         public bool ProccessColorChanges()
@@ -201,6 +224,7 @@ namespace FFPR_ColoredWindows.Main
 
         public void Update()
         {
+            refreshRate -= Time.deltaTime;
             try
             {
                 if (_resourceManager is null)
@@ -212,15 +236,21 @@ namespace FFPR_ColoredWindows.Main
                     
                     ModComponent.Log.LogInfo($"Waiting for window loading.");
                 }
-                ModComponent.Log.LogInfo("RefreshKey.Value");
-                Boolean isPressed = InputManager.GetKeyUp(ModComponent.Instance.Config.Window.Refresh);//todo:make this configurable
-                ModComponent.Log.LogInfo("isPressed?");
+                //ModComponent.Log.LogInfo("RefreshKey.Value");
+                Boolean isPressed = InputManager.GetKeyUp(ModComponent.Instance.Config.Window.Recolor);//todo:make this configurable
+                //ModComponent.Log.LogInfo("isPressed?");
                 if (isPressed)
                 {
-                    ModComponent.Log.LogInfo("isPressed!");
-                    RecolorKnown();
+                    //ModComponent.Log.LogInfo("isPressed!");
+                    RecolorTextures();
                 }
-                ProccessColorChanges();
+
+
+                if (refreshRate <= 0.0f)
+                {
+                    refreshRate = ModComponent.Instance.Config.Window.Refresh;
+                    ProccessColorChanges();
+                }
             }
             catch(Exception ex)
             {

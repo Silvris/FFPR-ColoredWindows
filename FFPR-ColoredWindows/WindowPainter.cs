@@ -19,17 +19,17 @@ namespace FFPR_ColoredWindows.Main
 {
     public sealed class WindowPainter
     {
-
         public ResourceManager _resourceManager;
         public List<int> tintedTextures;
         public static String[] textureList =
         {
-            "UI_Common_WindowFrame01", //originally had 1, and may still do it, but tinting with alpha messes up
+            "UI_Common_WindowFrame01",//01 is separated from this, as it is addressable, we only have to replace it once
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04"//no 05 as it is a speaker box
         };
         public List<Texture2D> windows;
+        public List<Texture2D> windowDefs;
         private String _filePath = "";
 
         public float refreshRate = 0.0f;//an immediate start
@@ -41,12 +41,21 @@ namespace FFPR_ColoredWindows.Main
                 Assembly thisone = Assembly.GetExecutingAssembly();
                 _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
                 windows = new List<Texture2D>();
+                windowDefs = new List<Texture2D>();
                 tintedTextures = new List<int>();
                 foreach (String name in textureList)
                 {
                     Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
                     tex.hideFlags = HideFlags.HideAndDontSave;
-                    windows.Add(tex);
+                    windowDefs.Add(tex);
+                }
+                foreach (Texture2D tex in windowDefs)
+                {
+                    //create a copy to be edited
+                    Texture2D nTex = new Texture2D(tex.width, tex.height) { name = tex.name, filterMode = FilterMode.Point };
+                    nTex.hideFlags = HideFlags.HideAndDontSave;
+                    Graphics.CopyTexture(tex, nTex);
+                    windows.Add(nTex);
                 }
                 RecolorTextures();
                 ModComponent.Log.LogInfo("Window Painter initialized.");
@@ -104,18 +113,19 @@ namespace FFPR_ColoredWindows.Main
             }
             return newTex;
         }*/
-        public void TintTexture(Texture2D source, Color tint)
+        public void TintTexture(Texture2D replace, Color[] cols, Color tint, float factor)
         {
             //this is only to be used on textures we generate
-            Color[] cols = source.GetPixels();
+            Color[] colcheck = replace.GetPixels();
+            if (!(colcheck.Length == cols.Length)) return;
             for (int i = 0; i < cols.Length; ++i)
             {
                 float a = cols[i].a;
-                cols[i] = Color.Lerp(cols[i], tint, 0.33f);
+                cols[i] = Color.Lerp(cols[i], tint, factor);
                 cols[i].a = a;
             }
-            source.SetPixels(cols);
-            source.Apply();
+            replace.SetPixels(cols);
+            replace.Apply();
         }
         public static Texture2D ReadTextureFromFile(String fullPath,String Name)
         {
@@ -141,17 +151,17 @@ namespace FFPR_ColoredWindows.Main
             {
                 foreach (Texture2D tex in windows)
                 {
-                    ModComponent.Log.LogInfo(tex.name);
+                    //ModComponent.Log.LogInfo(tex.name);
                     if (tex.name == "UI_Common_WindowFrame01")
                     {
-                        ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
+                        //ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
 
-                        TintTexture(tex, ModComponent.Instance.Config.Window.BorderColor);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BRColor,ModComponent.Instance.Config.Window.BorderFactor.Value);
                     }
                     else
                     {
-                        ModComponent.Log.LogInfo("Is Background");
-                        TintTexture(tex, ModComponent.Instance.Config.Window.BackgroundColor);
+                        //ModComponent.Log.LogInfo("Is Background");
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BGColor,ModComponent.Instance.Config.Window.BackgroundFactor.Value);
                     }
                 }
 
@@ -188,7 +198,8 @@ namespace FFPR_ColoredWindows.Main
                                         //dunno if this will work properly
                                         image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit,0,SpriteMeshType.Tight,original.border);
                                         image.sprite.name = original.name;
-                                        Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+                                        image.sprite.hideFlags = HideFlags.HideAndDontSave;
+                                        //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
                                         tintedTextures.Add(gob.GetInstanceID());
                                     }
                                 }
@@ -227,6 +238,7 @@ namespace FFPR_ColoredWindows.Main
             refreshRate -= Time.deltaTime;
             try
             {
+                /*
                 if (_resourceManager is null)
                 {
                     _resourceManager = ResourceManager.Instance;
@@ -236,6 +248,19 @@ namespace FFPR_ColoredWindows.Main
                     
                     ModComponent.Log.LogInfo($"Waiting for window loading.");
                 }
+                if((_resourceManager != null) && (!borderLoaded))
+                {
+                    if (_resourceManager.completeAssetDic.ContainsKey("Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01")) 
+                    {
+                        Sprite original = _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01"].Cast<Sprite>();
+                        Sprite newSpr = Sprite.Create(windows.Find(x => x.name == original.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
+                        newSpr.name = original.name;
+                        _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01"] = newSpr;
+                        Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+                        ModComponent.Log.LogInfo("Border loaded!");
+                        borderLoaded = true;//assures this only runs once, getting us a much cleaner replacement
+                    }
+                }*///somehow, none of this works
                 //ModComponent.Log.LogInfo("RefreshKey.Value");
                 Boolean isPressed = InputManager.GetKeyUp(ModComponent.Instance.Config.Window.Recolor);//todo:make this configurable
                 //ModComponent.Log.LogInfo("isPressed?");

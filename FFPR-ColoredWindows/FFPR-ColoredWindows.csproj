@@ -15,7 +15,7 @@
     <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173800</GameRegistryPath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
-    <GamePath Condition="'$(GamePath)' == ''">bin\FF4</GamePath>
+    <GamePath Condition="'$(GamePath)' == ''">bin\FF1</GamePath>
     <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -70,7 +70,8 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerRuntimeLib">
-      <HintPath>D:\Program Files\Steam\steamapps\common\FINAL FANTASY IV PR\BepInEx\core\UnhollowerRuntimeLib.dll</HintPath>
+      <HintPath>$(GamePath)\BepInEx\core\UnhollowerRuntimeLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InputSystem, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(GamePath)\BepInEx\unhollowed\Unity.InputSystem.dll</HintPath>
@@ -108,11 +109,9 @@
       <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY PR\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY PR\BepInEx\unhollowed\UnityEngine.UIModule.dll</HintPath>
+    <Reference Include="UnityEngine.UI, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

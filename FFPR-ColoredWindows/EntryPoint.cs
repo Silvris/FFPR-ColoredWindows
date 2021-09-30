@@ -16,12 +16,11 @@ namespace FFPR_ColoredWindows
     [BepInProcess("FINAL FANTASY VI.exe")]
     public class EntryPoint : BasePlugin
     {
+        public static EntryPoint Instance { get; private set; }
         public override void Load()
         {
             Log.LogInfo("Loading...");
-
-            //TypeRegister typeRegister = new TypeRegister(Log);
-            //typeRegister.RegisterAssemblyTypes();
+            Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<ModComponent>();
             String name = typeof(ModComponent).FullName;
             Log.LogInfo($"Initializing in-game singleton: {name}");

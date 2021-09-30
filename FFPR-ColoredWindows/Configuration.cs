@@ -1,7 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using FFPR_ColoredWindows.IL2CPP;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,31 +14,59 @@ namespace FFPR_ColoredWindows
     public class WindowsConfig
     {
         private const String Section = "Windows";
-        public ConfigEntry<float> BackgroundRed { get; set; }
-        public ConfigEntry<float> BackgroundGreen { get; set; }
-        public ConfigEntry<float> BackgroundBlue { get; set; }
-        public ConfigEntry<float> BorderRed { get; set; }
-        public ConfigEntry<float> BorderGreen { get; set; }
-        public ConfigEntry<float> BorderBlue { get; set; }
+        internal const String CTG_ID = "Colored Windows";
+        public ConfigFile Config;
+        public ConfigEntry<Color> BackgroundColor { get; set; }
+        public ConfigEntry<Color> BorderColor { get; set; }
+        public ConfigEntry<float> BackgroundFactor { get; set; }
+        public ConfigEntry<float> BorderFactor {get; set; }
         public ConfigEntry<KeyCode> RecolorKey { get; set; }
         public ConfigEntry<float> RefreshRate { get; set; }
 
-        public WindowsConfig(ConfigFile file)
+        public WindowsConfig()
         {
-            BackgroundRed = file.Bind(Section, nameof(BackgroundRed), (float)100, new ConfigDescription("The red component of the window background, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            BackgroundGreen = file.Bind(Section, nameof(BackgroundGreen), (float)100, new ConfigDescription("The green component of the window background, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            BackgroundBlue = file.Bind(Section, nameof(BackgroundBlue), (float)100, new ConfigDescription("The blue component of the window background, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            BorderRed = file.Bind(Section, nameof(BorderRed), (float)100, new ConfigDescription("The red component of the window border, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            BorderGreen = file.Bind(Section, nameof(BorderGreen), (float)100, new ConfigDescription("The green component of the window border, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            BorderBlue = file.Bind(Section, nameof(BorderBlue), (float)100, new ConfigDescription("The blue component of the window border, takes values from 0%-100%.", new AcceptableValueRange<float>(0, 100)));
-            RecolorKey = file.Bind(Section, nameof(RecolorKey), KeyCode.F6, $"Window color refresh key.{Environment.NewLine}https://docs.unity3d.com/ScriptReference/KeyCode.html");
-            RefreshRate = file.Bind(Section, nameof(RefreshRate), 10.0f, $"The amount of time the plugin should wait before trying to find more valid textures, in seconds.{Environment.NewLine} NOTE: if this is set too low, you will see major performance issues.");
-            
+            //used from Sinai's ConfigManager example
+            TomlTypeConverter.AddConverter(typeof(Color), new TypeConverter()
+            {
+                ConvertToObject = (string s, Type t) =>
+                {
+                    var split = s.Split(',');
+                    var c = new CultureInfo("en-US");
+                    return new Color()
+                    {
+                        r = float.Parse(split[0], c),
+                        g = float.Parse(split[1], c),
+                        b = float.Parse(split[2], c),
+                        a = float.Parse(split[3], c)
+                    };
+                },
+                ConvertToString = (object o, Type t) =>
+                {
+                    var x = (Color)o;
+                    return string.Format(new CultureInfo("en-US"), "{0},{1},{2},{3}",
+                        x.r, x.g, x.b, x.a);
+                }
+            });
+            Config = EntryPoint.Instance.Config;
+            BackgroundColor = Config.Bind(new ConfigDefinition(Section, nameof(BackgroundColor)), new Color(0f,0f,1f), new ConfigDescription("The color to tint the background with."));
+            BorderColor = Config.Bind(new ConfigDefinition(Section, nameof(BorderColor)), Color.white, new ConfigDescription("The color to tint the border with."));
+            BackgroundFactor = Config.Bind(Section, nameof(BackgroundFactor), 0.5f, new ConfigDescription("The strength of the tinting between the original window background and chosen color, where 0 is the unedited background, while 1 is full chosen color. Note that transparency will be maintained from the original image.", new AcceptableValueRange<float>(0f, 1f)));
+            BorderFactor = Config.Bind(Section, nameof(BorderFactor), 0f, new ConfigDescription("The strength of the tinting between the original window border and chosen color, where 0 is the unedited border, while 1 is full chosen color. Note that transparency will be maintained from the original image.", new AcceptableValueRange<float>(0f, 1f)));
+            RecolorKey = Config.Bind(Section, nameof(RecolorKey), KeyCode.F6, $"The key to pop up the GUI menu to select colors and apply them.{Environment.NewLine}https://docs.unity3d.com/ScriptReference/KeyCode.html");
+            RefreshRate = Config.Bind(Section, nameof(RefreshRate), 10.0f, $"The amount of time the plugin should wait before trying to find more valid textures, in seconds.{Environment.NewLine} NOTE: if this is set too low, you will see major performance issues.");
+            BackgroundColor.SettingChanged += wc_SettingsChanged;
+            BorderColor.SettingChanged += wc_SettingsChanged;
+            BackgroundFactor.SettingChanged += wc_SettingsChanged;
+            BorderFactor.SettingChanged += wc_SettingsChanged;
         }
-        public Color BackgroundColor => new Color(BackgroundRed.Value/100, BackgroundGreen.Value/100, BackgroundBlue.Value/100);
-        public Color BorderColor => new Color(BorderRed.Value / 100, BorderGreen.Value / 100, BorderBlue.Value / 100);
+        public Color BGColor => BackgroundColor.Value;
+        public Color BRColor => BorderColor.Value;
         public KeyCode Recolor => RecolorKey.Value;
         public float Refresh => RefreshRate.Value;
+        public static void wc_SettingsChanged(object sender, EventArgs e)
+        {
+            ModComponent.Instance.Painter.RecolorTextures();
+        }
     }
     public class Configuration
     {
@@ -49,8 +79,7 @@ namespace FFPR_ColoredWindows
                 {
                     log.LogInfo($"Initializing {nameof(Configuration)}");
 
-                    ConfigFile file = new ConfigFile(GetConfigurationPath(), true, ownerMetadata: null);
-                    Window = new WindowsConfig(file);
+                    Window = new WindowsConfig();
 
                     log.LogInfo($"{nameof(Configuration)} initialized successfully.");
                 }

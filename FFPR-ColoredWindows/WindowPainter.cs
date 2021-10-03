@@ -21,12 +21,15 @@ namespace FFPR_ColoredWindows.Main
     {
         public ResourceManager _resourceManager;
         public List<int> tintedTextures;
+        public List<SpriteData> spriteDatas;
         public static String[] textureList =
         {
             "UI_Common_WindowFrame01",//01 is separated from this, as it is addressable, we only have to replace it once
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04"//no 05 as it is a speaker box
+            //"UI_Common_ATBgauge02"
+
         };
         public List<Texture2D> windows;
         public List<Texture2D> windowDefs;
@@ -42,11 +45,20 @@ namespace FFPR_ColoredWindows.Main
                 _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
                 windows = new List<Texture2D>();
                 windowDefs = new List<Texture2D>();
+                spriteDatas = new List<SpriteData>();
                 tintedTextures = new List<int>();
                 foreach (String name in textureList)
                 {
                     Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
                     tex.hideFlags = HideFlags.HideAndDontSave;
+                    ModComponent.Log.LogInfo($"Loaded texture:{_filePath+name+".png"}");
+                    if (File.Exists(_filePath + name + ".spriteData"))
+                    {
+                        SpriteData sd = new SpriteData(File.ReadAllLines(_filePath + name + ".spriteData"), name);
+                        spriteDatas.Add(sd);
+                        tex.wrapMode = sd.hasWrap ? sd.wrapMode : tex.wrapMode;
+
+                    }
                     windowDefs.Add(tex);
                 }
                 foreach (Texture2D tex in windowDefs)
@@ -172,6 +184,36 @@ namespace FFPR_ColoredWindows.Main
             }
         }
 
+        public void SetImageSprite(Image image,int instanceId)
+        {
+            Sprite original = image.sprite;
+            //check for overriding spriteData
+            bool hasSD = spriteDatas.Exists(x => x.name == image.sprite.texture.name);
+            ModComponent.Log.LogInfo(hasSD);
+            if (hasSD)
+            {
+                SpriteData sd = spriteDatas.Find(x => x.name == image.sprite.texture.name);
+                ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
+                Rect r = sd.hasRect ? sd.rect : original.rect;
+                Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
+                Vector4 b = sd.hasBorder ? sd.border : original.border;
+                Image.Type t = sd.hasType ? sd.type : image.type;
+                image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);
+                image.type = t;
+
+            }
+            else
+            {
+                image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
+
+            }
+
+            //dunno if this will work properly
+            image.sprite.name = original.name;
+            image.sprite.hideFlags = HideFlags.HideAndDontSave;
+            //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+            tintedTextures.Add(instanceId);
+        }
 
         public void GatherKnownTextures()
         {
@@ -179,6 +221,7 @@ namespace FFPR_ColoredWindows.Main
             {
                 List<Object> gobs = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
                 List<Object> images = gobs.FindAll(x => x.name == "image");//this is cursed, don't do this
+                List<Object> gauges = gobs.FindAll(x => x.name == "gauge");//why am I adding another
                 foreach (Object img in images)
                 {
                     if (!tintedTextures.Contains(img.GetInstanceID()))
@@ -194,13 +237,32 @@ namespace FFPR_ColoredWindows.Main
                                 {
                                     if (textureList.Contains(image.sprite.texture.name))
                                     {
-                                        Sprite original = image.sprite;
-                                        //dunno if this will work properly
-                                        image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit,0,SpriteMeshType.Tight,original.border);
-                                        image.sprite.name = original.name;
-                                        image.sprite.hideFlags = HideFlags.HideAndDontSave;
-                                        //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
-                                        tintedTextures.Add(gob.GetInstanceID());
+                                        SetImageSprite(image, gob.GetInstanceID());
+                                    }
+                                }
+                            }
+
+                        }
+
+
+                    }
+                }
+                foreach (Object img in gauges)
+                {
+                    if (!tintedTextures.Contains(img.GetInstanceID()))
+                    {
+                        GameObject gob = Object.FindObjectFromInstanceID(img.GetInstanceID()).Cast<GameObject>();
+                        Image image = gob.GetComponent<Image>();
+                        //go ahead and tint on the way in
+                        if (image != null)
+                        {
+                            if (image.sprite != null)
+                            {
+                                if (image.sprite.texture != null)
+                                {
+                                    if (textureList.Contains(image.sprite.texture.name))
+                                    {
+                                        SetImageSprite(image, gob.GetInstanceID());
                                     }
                                 }
                             }
@@ -246,19 +308,23 @@ namespace FFPR_ColoredWindows.Main
                         return;
                     //wait for loading to happen
                     
-                    ModComponent.Log.LogInfo($"Waiting for window loading.");
+                    ModComponent.Log.LogInfo($"Waiting for ResourceManager.");
                 }
-                if((_resourceManager != null) && (!borderLoaded))
+                if((_resourceManager != null) && (!atbLoaded))
                 {
-                    if (_resourceManager.completeAssetDic.ContainsKey("Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01")) 
+                    if (_resourceManager.completeAssetDic.ContainsKey("Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02")) 
                     {
-                        Sprite original = _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01"].Cast<Sprite>();
+                        Sprite original = _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02"].Cast<Sprite>();
                         Sprite newSpr = Sprite.Create(windows.Find(x => x.name == original.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
                         newSpr.name = original.name;
-                        _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_WindowFrame01"] = newSpr;
-                        Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
-                        ModComponent.Log.LogInfo("Border loaded!");
-                        borderLoaded = true;//assures this only runs once, getting us a much cleaner replacement
+                        _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02"] = newSpr;
+                        //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+                        ModComponent.Log.LogInfo("ATB bar loaded!");
+                        atbLoaded = true;//assures this only runs once, getting us a much cleaner replacement
+                    }
+                    else
+                    {
+                        ModComponent.Log.LogInfo("ATB bar not loaded.");
                     }
                 }*///somehow, none of this works
                 //ModComponent.Log.LogInfo("RefreshKey.Value");

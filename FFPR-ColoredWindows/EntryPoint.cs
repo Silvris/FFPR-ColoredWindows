@@ -1,12 +1,15 @@
 ﻿using BepInEx;
 using BepInEx.IL2CPP;
 using FFPR_ColoredWindows.IL2CPP;
+using HarmonyLib;
 using System;
+using System.Reflection;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace FFPR_ColoredWindows
 {
+
     [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "1.0.0.0")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
@@ -22,6 +25,7 @@ namespace FFPR_ColoredWindows
             Log.LogInfo("Loading...");
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<ModComponent>();
+            ClassInjector.RegisterTypeInIl2Cpp<BattleUIManager_UpdateATBView>();
             String name = typeof(ModComponent).FullName;
             Log.LogInfo($"Initializing in-game singleton: {name}");
             GameObject singleton = new GameObject(name);
@@ -33,6 +37,19 @@ namespace FFPR_ColoredWindows
             {
                 GameObject.Destroy(singleton);
                 throw new Exception($"The object is missing the required component: {name}");
+            }
+        }
+        private void PatchMethods()
+        {
+            try
+            {
+                Log.LogInfo("Patching methods...");
+                Harmony harmony = new Harmony("silvris.ffpr.colored_windows");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to patch methods.", ex);
             }
         }
     }

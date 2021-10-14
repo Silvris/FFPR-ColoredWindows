@@ -125,7 +125,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BattleUIManager_UpdateATBView.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="InputManager.cs" />

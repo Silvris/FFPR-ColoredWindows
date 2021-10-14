@@ -25,7 +25,6 @@ namespace FFPR_ColoredWindows
             Log.LogInfo("Loading...");
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<ModComponent>();
-            ClassInjector.RegisterTypeInIl2Cpp<BattleUIManager_UpdateATBView>();
             String name = typeof(ModComponent).FullName;
             Log.LogInfo($"Initializing in-game singleton: {name}");
             GameObject singleton = new GameObject(name);

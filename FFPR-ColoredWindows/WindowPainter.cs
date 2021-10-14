@@ -14,13 +14,14 @@ using Object = UnityEngine.Object;
 using UnhollowerRuntimeLib;
 using UnityEngine.InputSystem;
 using HarmonyLib;
+using UnityEngine.SceneManagement;
+using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace FFPR_ColoredWindows.Main
 {
     public sealed class WindowPainter
     {
         public ResourceManager _resourceManager;
-        public List<int> tintedTextures;
         public List<SpriteData> spriteDatas;
         public static String[] textureList =
         {
@@ -33,8 +34,10 @@ namespace FFPR_ColoredWindows.Main
         };
         public List<Texture2D> windows;
         public List<Texture2D> windowDefs;
+        public List<string> loadedScenes;
         private String _filePath = "";
-
+        private bool runTitle = false;
+        private bool runMain = false;
         public float refreshRate = 0.0f;//an immediate start
 
         public WindowPainter()
@@ -46,7 +49,7 @@ namespace FFPR_ColoredWindows.Main
                 windows = new List<Texture2D>();
                 windowDefs = new List<Texture2D>();
                 spriteDatas = new List<SpriteData>();
-                tintedTextures = new List<int>();
+                loadedScenes = new List<string>();
                 foreach (String name in textureList)
                 {
                     Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
@@ -81,7 +84,38 @@ namespace FFPR_ColoredWindows.Main
         {
             ModComponent.Log.LogInfo($"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
         }
-        /* commenting out since they're not needed as of now
+        public static List<GameObject> GetAllChildren(GameObject obj)
+        {
+            List<GameObject> children = new List<GameObject>();
+
+            if (obj != null)
+            {
+                for (int i = 0; i < obj.transform.childCount; i++)
+                {
+                    Transform child = obj.transform.GetChild(i);
+                    if (child != null)
+                    {
+                        if (child.gameObject != null)
+                        {
+                            children.Add(child.gameObject);
+                            if (child.childCount != 0)
+                            {
+                                children.AddRange(GetAllChildren(child.gameObject));
+                            }
+                        }
+                    }
+
+
+                }
+            }
+            else
+            {
+                ModComponent.Log.LogWarning("Root object is null!");
+            }
+
+            return children;
+        }
+        /* commenting out since they're not needed as of now, may become of use later
         public Texture2D RemoveTrim(Texture2D source)
         {
             Texture2D newTex = new Texture2D(source.width - 6, source.height - 3);
@@ -184,16 +218,16 @@ namespace FFPR_ColoredWindows.Main
             }
         }
 
-        public void SetImageSprite(Image image,int instanceId)
+        public void SetImageSprite(Image image)
         {
             Sprite original = image.sprite;
             //check for overriding spriteData
             bool hasSD = spriteDatas.Exists(x => x.name == image.sprite.texture.name);
-            ModComponent.Log.LogInfo(hasSD);
+            //ModComponent.Log.LogInfo(hasSD);
             if (hasSD)
             {
                 SpriteData sd = spriteDatas.Find(x => x.name == image.sprite.texture.name);
-                ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
+                //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
                 Rect r = sd.hasRect ? sd.rect : original.rect;
                 Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
                 Vector4 b = sd.hasBorder ? sd.border : original.border;
@@ -212,13 +246,114 @@ namespace FFPR_ColoredWindows.Main
             image.sprite.name = original.name;
             image.sprite.hideFlags = HideFlags.HideAndDontSave;
             //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
-            tintedTextures.Add(instanceId);
         }
-
+        public void RemoveUnloadedScenes()
+        {
+            foreach (string scene in loadedScenes.ToList())//ToList prevents an issue where loadedScenes will be changed while this is running
+            {
+                List<Scene> scenes = new List<Scene>(SceneManager.GetAllScenes());
+                //not sure if the predicate is better for efficiency here tbh
+                int exists = scenes.FindIndex(x => x.name == scene);
+                if (exists == -1)
+                {
+                    //scene has been unloaded
+                    ModComponent.Log.LogInfo("Removed scene: " + scene);
+                    loadedScenes.Remove(scene);
+                }
+            }
+        }
         public void GatherKnownTextures()
         {
             try
             {
+                List<Scene> scenes = new List<Scene>(SceneManager.GetAllScenes());
+                foreach (Scene scn in scenes)
+                {
+                    if (!loadedScenes.Contains(scn.name))
+                    {
+                        if(scn.isLoaded) //this means all current sub-scenes (ie battleMenu or shopMenu) are loaded, hopefully
+                        {
+
+                            ModComponent.Log.LogInfo("Loaded scene: " + scn.name);
+                            List<GameObject> roots = new List<GameObject>(scn.GetRootGameObjects());
+                            foreach (GameObject go in roots)
+                            {
+                                List<GameObject> gobs = GetAllChildren(go);
+                                gobs.Add(go);//just in case
+                                foreach(GameObject gob in gobs)
+                                {
+                                    //ModComponent.Log.LogInfo(gob.name);
+                                    Image img = gob.GetComponent<Image>();
+                                    if(img != null)
+                                    {
+                                        if (textureList.Contains(img.mainTexture.name))
+                                        {
+                                            SetImageSprite(img);
+                                        }
+                                    }
+                                }
+                            }
+                            loadedScenes.Add(scn.name);
+                        }
+                    }
+                }
+                if (!runTitle)
+                {
+                    if ((Last.Management.SceneManager.Instance != null) && (Last.Management.SceneManager.Instance.currentSceneName == "Title") && Last.Management.SceneManager.Instance.CheckSceneLoadingCompleted())
+                    {
+                        List<Object> roots = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
+                        foreach(GameObject go in roots)
+                        {
+                            List<GameObject> gobs = GetAllChildren(go);
+                            gobs.Add(go);//just in case
+                            foreach (GameObject gob in gobs)
+                            {
+                                ModComponent.Log.LogInfo(gob.scene);
+                                if (!gob.scene.IsValid())
+                                {
+                                    ModComponent.Log.LogInfo(gob.name);
+                                    Image img = gob.GetComponent<Image>();
+                                    if (img != null)
+                                    {
+                                        if (textureList.Contains(img.mainTexture.name))
+                                        {
+                                            SetImageSprite(img);
+                                        }
+                                    }
+                                }
+                                //
+
+                            }
+                        }
+                        runTitle = true;
+                    }
+                }
+                else if (!runMain)
+                {
+                    if ((Last.Management.SceneManager.Instance != null) && (Last.Management.SceneManager.Instance.currentSceneName == "MainGame") && Last.Management.SceneManager.Instance.CheckSceneLoadingCompleted())
+                    {
+                        List<Object> roots = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
+                        foreach (GameObject go in roots)
+                        {
+                            List<GameObject> gobs = GetAllChildren(go);
+                            gobs.Add(go);//just in case
+                            foreach (GameObject gob in gobs)
+                            {
+                                //ModComponent.Log.LogInfo(gob.name);
+                                Image img = gob.GetComponent<Image>();
+                                if (img != null)
+                                {
+                                    if (textureList.Contains(img.mainTexture.name))
+                                    {
+                                        SetImageSprite(img);
+                                    }
+                                }
+                            }
+                        }
+                        runMain = true;//this will cause a little duplication, but will be overall much better than our previous approach
+                    }
+                }
+                /* finally removing this
                 List<Object> gobs = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
                 List<Object> images = gobs.FindAll(x => x.name == "image");//this is cursed, don't do this
                 List<Object> gauges = gobs.FindAll(x => x.name == "gauge");//why am I adding another
@@ -271,7 +406,8 @@ namespace FFPR_ColoredWindows.Main
 
 
                     }
-                }
+                }*/
+
             }
             catch(Exception ex)
             {
@@ -333,7 +469,8 @@ namespace FFPR_ColoredWindows.Main
                 if (isPressed)
                 {
                     //ModComponent.Log.LogInfo("isPressed!");
-                    RecolorTextures();
+                    ProccessColorChanges();
+                    RemoveUnloadedScenes();
                 }
 
 
@@ -341,6 +478,7 @@ namespace FFPR_ColoredWindows.Main
                 {
                     refreshRate = ModComponent.Instance.Config.Window.Refresh;
                     ProccessColorChanges();
+                    RemoveUnloadedScenes();
                 }
             }
             catch(Exception ex)

@@ -28,16 +28,80 @@ namespace FFPR_ColoredWindows.Main
             "UI_Common_WindowFrame01",//01 is separated from this, as it is addressable, we only have to replace it once
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
-            "UI_Common_WindowFrame04"//no 05 as it is a speaker box
-            //"UI_Common_ATBgauge02"
+            "UI_Common_WindowFrame04"//,//no 05 as it is a speaker box
+            //"UI_Common_ATBgauge02",
+            //"UI_Common_ATBgauge03"
+
+        };
+        public List<string> targetGobs = new List<string> {// as a side note, if you were somehow to get the game to load in touch mode, none of this would work
+            "Assets/GameAssets/Common/UI/Common/common_window",
+            "Assets/GameAssets/Common/UI/Key/Common/message_window",
+            "Assets/GameAssets/Common/UI/Key/Common/message_multiple_window",
+            "Assets/GameAssets/Common/UI/Key/Common/message_choices_window",
+            "Assets/GameAssets/Common/UI/Key/Common/message_system_window",
+            "Assets/GameAssets/Common/UI/Key/Common/message_selected_window",
+            "Assets/GameAssets/Common/UI/Key/Common/battle_message_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/NewGame/Prefab/new_game",//there's like 7 within this one
+            "Assets/GameAssets/Common/UI/Key/License/Prefab/license_window",
+            "Assets/GameAssets/Common/UI/Key/LoadGame/Prefab/loadGame",
+            "Assets/GameAssets/Common/UI/Key/Option/Prefab/option",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Item/Prefab/item_info",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/StatusList/Prefabs/status_info",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Save/Prefab/save_popup",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Equipment/Prefab/equipment_info",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Save/Prefab/save_info",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Common/Prefab/key_help",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Item/Prefabs/item_target_select_list",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Equipment/Prefabs/equipment_status_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Config/Prefab/config",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Equipment/Prefabs/equipment_description_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Ability/Prefabs/ability_info",
+            "Assets/GameAssets/Common/UI/Key/MainMenu/Common/Prefab/crystal_info",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Common/Prefabs/comand_menu",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/StatusDetails/Prefabs/status_details",
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/jobchange_popup", //FF5 job menu
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/input_popup",
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/game_over_select_popup",
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/change_name_popup",
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/common_popup",
+            "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/change_magic_stone_popup",//FF6 Magicite
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/trade_popup",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/item_menu_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/equip_menu_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/sell_list_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/Shop/Prefabs/magic_list_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/equip_list_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/item_list_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/Shop/Prefabs/magic_trade_popup",
+            "Assets/GameAssets/Serial/Res/UI/Key/Shop/Prefabs/get_magic_list_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/Shop/Prefabs/magic_menu_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/magic_item_list_window",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/shop_base",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/trade_magic_popup",
+            "Assets/GameAssets/Common/UI/Key/Shop/Prefabs/magic_item_menu_window",
+            "Assets/GameAssets/Common/UI/Key/ChangeName/Prefabs/change_name_base",
+            "Assets/GameAssets/Common/UI/Key/PartySetting/Prefabs/party_setting",
+            "Assets/GameAssets/Common/UI/Key/ScreenTimer/screen_timer",
+            "Assets/GameAssets/Common/UI/Touch/Field/Prefabs/field_help",
+            "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/battle_info_window",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/command_input_window",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/game_over_popup",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view",
+            //"Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view_ATB",
+            "Assets/GameAssets/Serial/Res/UI/Key/Result/Prefabs/result_menu",
+            "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/equip_select_window",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/command_message_window",
+            "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/ability_info_window",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/special_ability_help",
+            "Assets/GameAssets/Common/UI/Key/GpsMenu/gps_menu_base",
+            "Assets/GameAssets/Common/UI/Key/ExpandMinimap/expand_minimap_base",
+            "Assets/GameAssets/Common/UI/Key/PlayData/Prefab/play_data_window"
 
         };
         public List<Texture2D> windows;
         public List<Texture2D> windowDefs;
         public List<string> loadedScenes;
         private String _filePath = "";
-        private bool runTitle = false;
-        private bool runMain = false;
         public float refreshRate = 0.0f;//an immediate start
 
         public WindowPainter()
@@ -220,215 +284,36 @@ namespace FFPR_ColoredWindows.Main
 
         public void SetImageSprite(Image image)
         {
-            Sprite original = image.sprite;
-            //check for overriding spriteData
-            bool hasSD = spriteDatas.Exists(x => x.name == image.sprite.texture.name);
-            //ModComponent.Log.LogInfo(hasSD);
-            if (hasSD)
+            if(image.sprite != null)
             {
-                SpriteData sd = spriteDatas.Find(x => x.name == image.sprite.texture.name);
-                //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
-                Rect r = sd.hasRect ? sd.rect : original.rect;
-                Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
-                Vector4 b = sd.hasBorder ? sd.border : original.border;
-                Image.Type t = sd.hasType ? sd.type : image.type;
-                image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);
-                image.type = t;
-
-            }
-            else
-            {
-                image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
-
-            }
-
-            //dunno if this will work properly
-            image.sprite.name = original.name;
-            image.sprite.hideFlags = HideFlags.HideAndDontSave;
-            //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
-        }
-        public void RemoveUnloadedScenes()
-        {
-            foreach (string scene in loadedScenes.ToList())//ToList prevents an issue where loadedScenes will be changed while this is running
-            {
-                List<Scene> scenes = new List<Scene>(SceneManager.GetAllScenes());
-                //not sure if the predicate is better for efficiency here tbh
-                int exists = scenes.FindIndex(x => x.name == scene);
-                if (exists == -1)
+                Sprite original = image.sprite;
+                //check for overriding spriteData
+                bool hasSD = spriteDatas.Exists(x => x.name == image.sprite.texture.name);
+                //ModComponent.Log.LogInfo(hasSD);
+                if (hasSD)
                 {
-                    //scene has been unloaded
-                    ModComponent.Log.LogInfo("Removed scene: " + scene);
-                    loadedScenes.Remove(scene);
+                    SpriteData sd = spriteDatas.Find(x => x.name == image.sprite.texture.name);
+                    //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
+                    Rect r = sd.hasRect ? sd.rect : original.rect;
+                    Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
+                    Vector4 b = sd.hasBorder ? sd.border : original.border;
+                    Image.Type t = sd.hasType ? sd.type : image.type;
+                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);
+                    image.type = t;
+
                 }
-            }
-        }
-        public void GatherKnownTextures()
-        {
-            try
-            {
-                List<Scene> scenes = new List<Scene>(SceneManager.GetAllScenes());
-                foreach (Scene scn in scenes)
+                else
                 {
-                    if (!loadedScenes.Contains(scn.name))
-                    {
-                        if(scn.isLoaded) //this means all current sub-scenes (ie battleMenu or shopMenu) are loaded, hopefully
-                        {
+                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
 
-                            ModComponent.Log.LogInfo("Loaded scene: " + scn.name);
-                            List<GameObject> roots = new List<GameObject>(scn.GetRootGameObjects());
-                            foreach (GameObject go in roots)
-                            {
-                                List<GameObject> gobs = GetAllChildren(go);
-                                gobs.Add(go);//just in case
-                                foreach(GameObject gob in gobs)
-                                {
-                                    //ModComponent.Log.LogInfo(gob.name);
-                                    Image img = gob.GetComponent<Image>();
-                                    if(img != null)
-                                    {
-                                        if (textureList.Contains(img.mainTexture.name))
-                                        {
-                                            SetImageSprite(img);
-                                        }
-                                    }
-                                }
-                            }
-                            loadedScenes.Add(scn.name);
-                        }
-                    }
                 }
-                if (!runTitle)
-                {
-                    if ((Last.Management.SceneManager.Instance != null) && (Last.Management.SceneManager.Instance.currentSceneName == "Title") && Last.Management.SceneManager.Instance.CheckSceneLoadingCompleted())
-                    {
-                        List<Object> roots = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
-                        foreach(GameObject go in roots)
-                        {
-                            List<GameObject> gobs = GetAllChildren(go);
-                            gobs.Add(go);//just in case
-                            foreach (GameObject gob in gobs)
-                            {
-                                ModComponent.Log.LogInfo(gob.scene);
-                                if (!gob.scene.IsValid())
-                                {
-                                    ModComponent.Log.LogInfo(gob.name);
-                                    Image img = gob.GetComponent<Image>();
-                                    if (img != null)
-                                    {
-                                        if (textureList.Contains(img.mainTexture.name))
-                                        {
-                                            SetImageSprite(img);
-                                        }
-                                    }
-                                }
-                                //
 
-                            }
-                        }
-                        runTitle = true;
-                    }
-                }
-                else if (!runMain)
-                {
-                    if ((Last.Management.SceneManager.Instance != null) && (Last.Management.SceneManager.Instance.currentSceneName == "MainGame") && Last.Management.SceneManager.Instance.CheckSceneLoadingCompleted())
-                    {
-                        List<Object> roots = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
-                        foreach (GameObject go in roots)
-                        {
-                            List<GameObject> gobs = GetAllChildren(go);
-                            gobs.Add(go);//just in case
-                            foreach (GameObject gob in gobs)
-                            {
-                                //ModComponent.Log.LogInfo(gob.name);
-                                Image img = gob.GetComponent<Image>();
-                                if (img != null)
-                                {
-                                    if (textureList.Contains(img.mainTexture.name))
-                                    {
-                                        SetImageSprite(img);
-                                    }
-                                }
-                            }
-                        }
-                        runMain = true;//this will cause a little duplication, but will be overall much better than our previous approach
-                    }
-                }
-                /* finally removing this
-                List<Object> gobs = new List<Object>(Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameObject>()));
-                List<Object> images = gobs.FindAll(x => x.name == "image");//this is cursed, don't do this
-                List<Object> gauges = gobs.FindAll(x => x.name == "gauge");//why am I adding another
-                foreach (Object img in images)
-                {
-                    if (!tintedTextures.Contains(img.GetInstanceID()))
-                    {
-                        GameObject gob = Object.FindObjectFromInstanceID(img.GetInstanceID()).Cast<GameObject>();
-                        Image image = gob.GetComponent<Image>();
-                        //go ahead and tint on the way in
-                        if(image != null)
-                        {
-                            if(image.sprite != null)
-                            {
-                                if(image.sprite.texture != null)
-                                {
-                                    if (textureList.Contains(image.sprite.texture.name))
-                                    {
-                                        SetImageSprite(image, gob.GetInstanceID());
-                                    }
-                                }
-                            }
-
-                        }
-
-
-                    }
-                }
-                foreach (Object img in gauges)
-                {
-                    if (!tintedTextures.Contains(img.GetInstanceID()))
-                    {
-                        GameObject gob = Object.FindObjectFromInstanceID(img.GetInstanceID()).Cast<GameObject>();
-                        Image image = gob.GetComponent<Image>();
-                        //go ahead and tint on the way in
-                        if (image != null)
-                        {
-                            if (image.sprite != null)
-                            {
-                                if (image.sprite.texture != null)
-                                {
-                                    if (textureList.Contains(image.sprite.texture.name))
-                                    {
-                                        SetImageSprite(image, gob.GetInstanceID());
-                                    }
-                                }
-                            }
-
-                        }
-
-
-                    }
-                }*/
-
-            }
-            catch(Exception ex)
-            {
-                ModComponent.Log.LogError(ex);
-                throw ex;
+                //dunno if this will work properly
+                image.sprite.name = original.name;
+                image.sprite.hideFlags = HideFlags.HideAndDontSave;
+                //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
             }
 
-        }
-
-        public bool ProccessColorChanges()
-        {
-            try
-            {
-                GatherKnownTextures();
-                return true;
-            }
-            catch(Exception ex)
-            {
-                ModComponent.Log.LogError($"Unable to tint windows: {ex}");
-                return false;
-            }
         }
 
         public void Update()
@@ -436,7 +321,7 @@ namespace FFPR_ColoredWindows.Main
             refreshRate -= Time.deltaTime;
             try
             {
-                /*
+                
                 if (_resourceManager is null)
                 {
                     _resourceManager = ResourceManager.Instance;
@@ -446,40 +331,38 @@ namespace FFPR_ColoredWindows.Main
                     
                     ModComponent.Log.LogInfo($"Waiting for ResourceManager.");
                 }
-                if((_resourceManager != null) && (!atbLoaded))
+                if((_resourceManager != null) && (targetGobs.Count > 0))
                 {
-                    if (_resourceManager.completeAssetDic.ContainsKey("Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02")) 
+                    List<string> del = new List<string>();
+                    foreach(string target in targetGobs)
                     {
-                        Sprite original = _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02"].Cast<Sprite>();
-                        Sprite newSpr = Sprite.Create(windows.Find(x => x.name == original.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
-                        newSpr.name = original.name;
-                        _resourceManager.completeAssetDic["Assets/GameAssets/Common/UI/Common/Sprites/UI_Common_ATBgauge02"] = newSpr;
-                        //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
-                        ModComponent.Log.LogInfo("ATB bar loaded!");
-                        atbLoaded = true;//assures this only runs once, getting us a much cleaner replacement
+                        if (_resourceManager.completeAssetDic.ContainsKey(target))
+                        {
+                            GameObject gob = _resourceManager.completeAssetDic[target].Cast<GameObject>();
+                            List<GameObject> all = GetAllChildren(gob);
+                            all.Insert(0, gob);
+                            ModComponent.Log.LogInfo(all.Count);
+                            foreach (GameObject go in all)
+                            {
+                                Image img = go.GetComponent<Image>();
+                                if (img != null)
+                                {
+                                    ModComponent.Log.LogInfo(img.mainTexture.name);
+                                    if (textureList.Contains(img.mainTexture.name))
+                                    {
+                                        ModComponent.Log.LogInfo("Replaced sprite");
+                                        SetImageSprite(img);
+                                    }
+                                }
+                            }
+                            del.Add(target);
+                        }
                     }
-                    else
+                    foreach(string target in del)
                     {
-                        ModComponent.Log.LogInfo("ATB bar not loaded.");
+                        targetGobs.Remove(target);
                     }
-                }*///somehow, none of this works
-                //ModComponent.Log.LogInfo("RefreshKey.Value");
-                Boolean isPressed = InputManager.GetKeyUp(ModComponent.Instance.Config.Window.Recolor);//todo:make this configurable
-                //ModComponent.Log.LogInfo("isPressed?");
-                if (isPressed)
-                {
-                    //ModComponent.Log.LogInfo("isPressed!");
-                    ProccessColorChanges();
-                    RemoveUnloadedScenes();
-                }
-
-
-                if (refreshRate <= 0.0f)
-                {
-                    refreshRate = ModComponent.Instance.Config.Window.Refresh;
-                    ProccessColorChanges();
-                    RemoveUnloadedScenes();
-                }
+                }//oh how the turn tables
             }
             catch(Exception ex)
             {

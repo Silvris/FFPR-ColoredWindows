@@ -3,7 +3,7 @@ A mod for the FINAL FANTASY PIXEL REMASTERS that implements the ability to chang
 
 
 # Installation:
-1. Install a Bleeding-Edge build of BepInEx 6, which can be found here or used from a prior Memoria installation
+1. Install a Bleeding-Edge build of BepInEx 6, which can be found [here](https://builds.bepis.io/projects/bepinex_be) or used from a prior Memoria installation
 2. Drop the BepInEx folder from the mod into the game's main directory and merge folders if prompted
 3. Optional: in order to change color while the game is running, [sinai-dev's BepInExConfigManager](https://github.com/sinai-dev/BepInExConfigManager) will need to be installed
 

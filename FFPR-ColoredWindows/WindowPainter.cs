@@ -23,14 +23,12 @@ namespace FFPR_ColoredWindows.Main
     {
         public ResourceManager _resourceManager;
         public List<SpriteData> spriteDatas;
-        public static String[] textureList =
+        public List<string> textureList = new List<string>
         {
-            "UI_Common_WindowFrame01",//01 is separated from this, as it is addressable, we only have to replace it once
+            "UI_Common_WindowFrame01",
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
-            "UI_Common_WindowFrame04"//,//no 05 as it is a speaker box
-            //"UI_Common_ATBgauge02",
-            //"UI_Common_ATBgauge03"
+            "UI_Common_WindowFrame04",//no 05 as it is a speaker box
 
         };
         public List<string> targetGobs = new List<string> {// as a side note, if you were somehow to get the game to load in touch mode, none of this would work
@@ -86,8 +84,6 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/battle_info_window",
             "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/command_input_window",
             "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/game_over_popup",
-            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view",
-            //"Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view_ATB",
             "Assets/GameAssets/Serial/Res/UI/Key/Result/Prefabs/result_menu",
             "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/equip_select_window",
             "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/command_message_window",
@@ -95,14 +91,20 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/special_ability_help",
             "Assets/GameAssets/Common/UI/Key/GpsMenu/gps_menu_base",
             "Assets/GameAssets/Common/UI/Key/ExpandMinimap/expand_minimap_base",
-            "Assets/GameAssets/Common/UI/Key/PlayData/Prefab/play_data_window"
+            "Assets/GameAssets/Common/UI/Key/PlayData/Prefab/play_data_window",
+            "Assets/GameAssets/Common/UI/Key/ExtraLibrary/library_menu_base",
+            "Assets/GameAssets/Common/UI/Key/ExtraLibrary/library_dungeon_base",
+            "Assets/GameAssets/Common/UI/Key/ExtraLibrary/library_field_base",
+            "Assets/GameAssets/Common/UI/Key/ExtraLibrary/library_info_base",
+            "Assets/GameAssets/Common/UI/Key/SoundPlayer/sound_player_base_controller",
+            "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerydetails_base",
+            "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerytop_base"
 
         };
         public List<Texture2D> windows;
         public List<Texture2D> windowDefs;
         public List<string> loadedScenes;
         private String _filePath = "";
-        public float refreshRate = 0.0f;//an immediate start
 
         public WindowPainter()
         {
@@ -110,23 +112,48 @@ namespace FFPR_ColoredWindows.Main
             {
                 Assembly thisone = Assembly.GetExecutingAssembly();
                 _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
+                
+                if (ModComponent.isATB)
+                {
+                    targetGobs.Add("Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view_ATB");
+                    targetGobs.Add("Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/player_info_content");
+                    textureList.Add("UI_Common_ATBgauge02");
+                    textureList.Add("UI_Common_ATBgauge03");
+                }
+                else
+                {
+                    targetGobs.Add("Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view");
+                }
                 windows = new List<Texture2D>();
                 windowDefs = new List<Texture2D>();
                 spriteDatas = new List<SpriteData>();
                 loadedScenes = new List<string>();
+                List<string> texListDel = new List<string>();
                 foreach (String name in textureList)
                 {
-                    Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
-                    tex.hideFlags = HideFlags.HideAndDontSave;
-                    ModComponent.Log.LogInfo($"Loaded texture:{_filePath+name+".png"}");
-                    if (File.Exists(_filePath + name + ".spriteData"))
+                    try
                     {
-                        SpriteData sd = new SpriteData(File.ReadAllLines(_filePath + name + ".spriteData"), name);
-                        spriteDatas.Add(sd);
-                        tex.wrapMode = sd.hasWrap ? sd.wrapMode : tex.wrapMode;
+                        Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
+                        tex.hideFlags = HideFlags.HideAndDontSave;
+                        ModComponent.Log.LogInfo($"Loaded texture:{_filePath + name + ".png"}");
+                        if (File.Exists(_filePath + name + ".spriteData"))
+                        {
+                            SpriteData sd = new SpriteData(File.ReadAllLines(_filePath + name + ".spriteData"), name);
+                            spriteDatas.Add(sd);
+                            tex.wrapMode = sd.hasWrap ? sd.wrapMode : tex.wrapMode;
 
+                        }
+                        windowDefs.Add(tex);
+                    }catch(Exception ex)
+                    {
+                        ModComponent.Log.LogError($"Unable to load texture: {ex}");
+                        texListDel.Add(name);
                     }
-                    windowDefs.Add(tex);
+
+                }
+                foreach(string name in texListDel)
+                {
+                    textureList.Remove(name);
                 }
                 foreach (Texture2D tex in windowDefs)
                 {
@@ -266,12 +293,20 @@ namespace FFPR_ColoredWindows.Main
                     {
                         //ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
 
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BRColor,ModComponent.Instance.Config.Window.BorderFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BRColor, ModComponent.Instance.Config.Window.BorderFactor.Value);
+                    }
+                    else if (tex.name == "UI_Common_ATBgauge02")
+                    {
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.ATBFill, ModComponent.Instance.Config.Window.ATBFillingFactor.Value);
+                    }
+                    else if (tex.name == "UI_Common_ATBgauge03")
+                    {
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.ATBFull, ModComponent.Instance.Config.Window.ATBFullFactor.Value);
                     }
                     else
                     {
                         //ModComponent.Log.LogInfo("Is Background");
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BGColor,ModComponent.Instance.Config.Window.BackgroundFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BGColor, ModComponent.Instance.Config.Window.BackgroundFactor.Value);
                     }
                 }
 
@@ -318,7 +353,6 @@ namespace FFPR_ColoredWindows.Main
 
         public void Update()
         {
-            refreshRate -= Time.deltaTime;
             try
             {
                 

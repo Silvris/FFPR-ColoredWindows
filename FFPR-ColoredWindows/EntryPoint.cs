@@ -38,18 +38,5 @@ namespace FFPR_ColoredWindows
                 throw new Exception($"The object is missing the required component: {name}");
             }
         }
-        private void PatchMethods()
-        {
-            try
-            {
-                Log.LogInfo("Patching methods...");
-                Harmony harmony = new Harmony("silvris.ffpr.colored_windows");
-                harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to patch methods.", ex);
-            }
-        }
     }
 }

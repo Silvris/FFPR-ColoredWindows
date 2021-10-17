@@ -11,6 +11,16 @@ A mod for the FINAL FANTASY PIXEL REMASTERS that implements the ability to chang
 # Using custom windows:
 In order to use modded windows with this, you will need to replace the images in BepInEx/plugins/ColoredWindows with their equivalents from the mod of your choosing.
 
+# SpriteData:
+SpriteData attributes can be accessed by creating a .txt file, filling in the wanted parameters, and then renaming the file extension to .spriteData.
+
+SpriteData exposes the following parameters:
+* Rect = the rectangle that "crops" the base Texture2D into a Sprite - format is [0,0,0,0]
+* Pivot = the pivot point (in pixels) of the Sprite - format is [0,0]
+* Border = the border to be used in [9-slice scaling](https://docs.unity3d.com/Manual/9SliceSprites.html) (used by WindowFrame01 by default) - format is [0,0,0,0]
+* Type = Image parameter that determines how the Sprite should be displayed - options are Simple, Sliced, Tiled, Filled
+* WrapMode = Texture2D parameter that defines wrapping on the texture - options are Clamp, Repeat, Mirror, MirrorOnce
+
 # Credits:
 * Faospark - for testing and providing me with the edited gradients to bundle with the dll
 * The BepInEx Official Discord Server - for answering all of my dumb Unity questions

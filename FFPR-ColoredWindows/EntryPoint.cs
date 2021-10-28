@@ -25,6 +25,7 @@ namespace FFPR_ColoredWindows
             Log.LogInfo("Loading...");
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<ModComponent>();
+            ClassInjector.RegisterTypeInIl2Cpp<ResourceManager_IsLoadAssetCompleted>();
             String name = typeof(ModComponent).FullName;
             Log.LogInfo($"Initializing in-game singleton: {name}");
             GameObject singleton = new GameObject(name);
@@ -36,6 +37,21 @@ namespace FFPR_ColoredWindows
             {
                 GameObject.Destroy(singleton);
                 throw new Exception($"The object is missing the required component: {name}");
+            }
+            PatchMethods();
+            ModComponent.Log.LogInfo("Plugin initialized!");
+        }
+        private void PatchMethods()
+        {
+            try
+            {
+                Log.LogInfo("Patching methods...");
+                Harmony harmony = new Harmony("silvris.ffpr.atb_fix");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to patch methods.", ex);
             }
         }
     }

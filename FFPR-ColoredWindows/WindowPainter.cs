@@ -21,6 +21,8 @@ namespace FFPR_ColoredWindows.Main
 {
     public sealed class WindowPainter
     {
+        public WindowPainter Instance;
+
         public ResourceManager _resourceManager;
         public List<SpriteData> spriteDatas;
         public List<string> textureList = new List<string>
@@ -98,18 +100,20 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Common/UI/Key/ExtraLibrary/library_info_base",
             "Assets/GameAssets/Common/UI/Key/SoundPlayer/sound_player_base_controller",
             "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerydetails_base",
-            "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerytop_base"
+            "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerytop_base",
+            "Assets/GameAssets/Common/UI/Key/SaveWindow/Prefabs/save_window"
 
         };
         public List<Texture2D> windows;
         public List<Texture2D> windowDefs;
         public List<string> loadedScenes;
         private String _filePath = "";
-
+        public Dictionary<string, int> knownObjects;
         public WindowPainter()
         {
             try
             {
+                Instance = this;
                 Assembly thisone = Assembly.GetExecutingAssembly();
                 _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
                 
@@ -128,6 +132,7 @@ namespace FFPR_ColoredWindows.Main
                 windowDefs = new List<Texture2D>();
                 spriteDatas = new List<SpriteData>();
                 loadedScenes = new List<string>();
+                knownObjects = new Dictionary<string, int>();
                 List<string> texListDel = new List<string>();
                 foreach (String name in textureList)
                 {
@@ -394,6 +399,7 @@ namespace FFPR_ColoredWindows.Main
                     }
                     foreach(string target in del)
                     {
+                        ModComponent.Log.LogInfo($"Loaded object:{target}");
                         targetGobs.Remove(target);
                     }
                 }//oh how the turn tables

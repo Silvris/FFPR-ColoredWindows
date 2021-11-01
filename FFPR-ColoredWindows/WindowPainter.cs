@@ -180,37 +180,7 @@ namespace FFPR_ColoredWindows.Main
         {
             ModComponent.Log.LogInfo($"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
         }
-        public static List<GameObject> GetAllChildren(GameObject obj)
-        {
-            List<GameObject> children = new List<GameObject>();
-
-            if (obj != null)
-            {
-                for (int i = 0; i < obj.transform.childCount; i++)
-                {
-                    Transform child = obj.transform.GetChild(i);
-                    if (child != null)
-                    {
-                        if (child.gameObject != null)
-                        {
-                            children.Add(child.gameObject);
-                            if (child.childCount != 0)
-                            {
-                                children.AddRange(GetAllChildren(child.gameObject));
-                            }
-                        }
-                    }
-
-
-                }
-            }
-            else
-            {
-                ModComponent.Log.LogWarning("Root object is null!");
-            }
-
-            return children;
-        }
+        
         /* commenting out since they're not needed as of now, may become of use later
         public Texture2D RemoveTrim(Texture2D source)
         {
@@ -351,7 +321,8 @@ namespace FFPR_ColoredWindows.Main
                 //dunno if this will work properly
                 image.sprite.name = original.name;
                 image.sprite.hideFlags = HideFlags.HideAndDontSave;
-                //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate
+                //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate actually if you destroy at all there is problems
+                //the resulting "memory leak" isn't large enough to be a problem
             }
 
         }
@@ -360,49 +331,7 @@ namespace FFPR_ColoredWindows.Main
         {
             try
             {
-                
-                if (_resourceManager is null)
-                {
-                    _resourceManager = ResourceManager.Instance;
-                    if (_resourceManager is null)
-                        return;
-                    //wait for loading to happen
-                    
-                    ModComponent.Log.LogInfo($"Waiting for ResourceManager.");
-                }
-                if((_resourceManager != null) && (targetGobs.Count > 0))
-                {
-                    List<string> del = new List<string>();
-                    foreach(string target in targetGobs)
-                    {
-                        if (_resourceManager.completeAssetDic.ContainsKey(target))
-                        {
-                            GameObject gob = _resourceManager.completeAssetDic[target].Cast<GameObject>();
-                            List<GameObject> all = GetAllChildren(gob);
-                            all.Insert(0, gob);
-                            ModComponent.Log.LogInfo(all.Count);
-                            foreach (GameObject go in all)
-                            {
-                                Image img = go.GetComponent<Image>();
-                                if (img != null)
-                                {
-                                    ModComponent.Log.LogInfo(img.mainTexture.name);
-                                    if (textureList.Contains(img.mainTexture.name))
-                                    {
-                                        ModComponent.Log.LogInfo("Replaced sprite");
-                                        SetImageSprite(img);
-                                    }
-                                }
-                            }
-                            del.Add(target);
-                        }
-                    }
-                    foreach(string target in del)
-                    {
-                        ModComponent.Log.LogInfo($"Loaded object:{target}");
-                        targetGobs.Remove(target);
-                    }
-                }//oh how the turn tables
+                //there is nothing to wait for anymore, perish
             }
             catch(Exception ex)
             {

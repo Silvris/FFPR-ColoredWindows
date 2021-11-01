@@ -6,6 +6,7 @@ using Exception = System.Exception;
 using IntPtr = System.IntPtr;
 using Logger = BepInEx.Logging.Logger;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FFPR_ColoredWindows.IL2CPP
 {
@@ -59,6 +60,37 @@ namespace FFPR_ColoredWindows.IL2CPP
                 throw;
             }
 
+        }
+        public static List<GameObject> GetAllChildren(GameObject obj)
+        {
+            List<GameObject> children = new List<GameObject>();
+
+            if (obj != null)
+            {
+                for (int i = 0; i < obj.transform.childCount; i++)
+                {
+                    Transform child = obj.transform.GetChild(i);
+                    if (child != null)
+                    {
+                        if (child.gameObject != null)
+                        {
+                            children.Add(child.gameObject);
+                            if (child.childCount != 0)
+                            {
+                                children.AddRange(GetAllChildren(child.gameObject));
+                            }
+                        }
+                    }
+
+
+                }
+            }
+            else
+            {
+                Log.LogWarning("Root object is null!");
+            }
+
+            return children;
         }
     }
 }

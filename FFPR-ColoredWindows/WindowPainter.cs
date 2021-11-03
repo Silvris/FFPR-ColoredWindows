@@ -321,7 +321,8 @@ namespace FFPR_ColoredWindows.Main
                 //dunno if this will work properly
                 image.sprite.name = original.name;
                 image.sprite.hideFlags = HideFlags.HideAndDontSave;
-                //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate actually if you destroy at all there is problems
+                //Object.Destroy(original);//make sure to use destroy, and not destroyImmediate 
+                //actually if you destroy at all there is problems
                 //the resulting "memory leak" isn't large enough to be a problem
             }
 

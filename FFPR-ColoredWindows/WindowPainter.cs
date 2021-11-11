@@ -60,6 +60,8 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/Common/Prefabs/comand_menu",
             "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/StatusDetails/Prefabs/status_details",
             "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/jobchange_popup", //FF5 job menu
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/JobChange/Prefabs/jobchange_info",
+            "Assets/GameAssets/Serial/Res/UI/Key/MainMenu/AbilityChange/Prefabs/ability_change_info",
             "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/input_popup",
             "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/game_over_select_popup",
             "Assets/GameAssets/Common/UI/Key/Popup/Prefabs/change_name_popup",

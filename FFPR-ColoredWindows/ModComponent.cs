@@ -17,7 +17,7 @@ namespace FFPR_ColoredWindows.IL2CPP
         public static string[] atbGames = { "FINAL FANTASY IV", "FINAL FANTASY V", "FINAL FANTASY VI" };
         public static string Game { get; private set; }
         public static bool isATB { get; private set; }
-        public Configuration Config { get; private set; }
+        public static Configuration Config { get; private set; }
         [field: NonSerialized]public WindowPainter Painter { get; private set; }
         private Boolean _isDisabled;
         public ModComponent(IntPtr ptr) : base(ptr)

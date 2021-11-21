@@ -270,20 +270,20 @@ namespace FFPR_ColoredWindows.Main
                     {
                         //ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
 
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BRColor, ModComponent.Instance.Config.Window.BorderFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.BRColor, ModComponent.Config.Window.BorderFactor.Value);
                     }
                     else if (tex.name == "UI_Common_ATBgauge02")
                     {
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.ATBFill, ModComponent.Instance.Config.Window.ATBFillingFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.ATBFill, ModComponent.Config.Window.ATBFillingFactor.Value);
                     }
                     else if (tex.name == "UI_Common_ATBgauge03")
                     {
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.ATBFull, ModComponent.Instance.Config.Window.ATBFullFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.ATBFull, ModComponent.Config.Window.ATBFullFactor.Value);
                     }
                     else
                     {
                         //ModComponent.Log.LogInfo("Is Background");
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Instance.Config.Window.BGColor, ModComponent.Instance.Config.Window.BackgroundFactor.Value);
+                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.BGColor, ModComponent.Config.Window.BackgroundFactor.Value);
                     }
                 }
 

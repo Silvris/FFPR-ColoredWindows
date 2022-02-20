@@ -56,6 +56,7 @@ namespace FFPR_ColoredWindows
                 }
             });
             Config = EntryPoint.Instance.Config;
+            /*
             BackgroundColor = Config.Bind(new ConfigDefinition(Windows, nameof(BackgroundColor)), new Color(0f,0f,1f), new ConfigDescription("The color to tint the background with."));
             BorderColor = Config.Bind(new ConfigDefinition(Windows, nameof(BorderColor)), Color.white, new ConfigDescription("The color to tint the border with."));
             BackgroundFactor = Config.Bind(Windows, nameof(BackgroundFactor), 0.5f, new ConfigDescription("The strength of the tinting between the original window background and chosen color, where 0 is the unedited background, while 1 is full chosen color. Note that transparency will be maintained from the original image.", new AcceptableValueRange<float>(0f, 1f)));
@@ -76,7 +77,7 @@ namespace FFPR_ColoredWindows
                 ATBFillingFactor.SettingChanged += wc_SettingsChanged;
                 ATBFullFactor.SettingChanged += wc_SettingsChanged;
             }
-
+            */
             _TextColor = Config.Bind(new ConfigDefinition(Text, "Text Color"), new Color(.91f, .91f, .91f, 1f), new ConfigDescription("The color of non-focused text in menus"));
             _ShadowColor = Config.Bind(new ConfigDefinition(Text, "Shadow Color"), new Color(0.68f, 0.68f, 0.68f,1f), new ConfigDescription("The color of non-focused shadows in menus"));
             _SpecialTextColor = Config.Bind(new ConfigDefinition(Text, "Special Text Color"), new Color(0.26f, 0.87f, 1f, 1f), new ConfigDescription("The color of special text such as the autosave slot."));

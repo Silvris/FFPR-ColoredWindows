@@ -24,7 +24,6 @@ namespace FFPR_ColoredWindows.Main
         public WindowPainter Instance;
 
         public ResourceManager _resourceManager;
-        public List<SpriteData> spriteDatas;
         public List<string> textureList = new List<string>
         {
             "UI_Common_WindowFrame01",
@@ -107,7 +106,7 @@ namespace FFPR_ColoredWindows.Main
 
         };
         public List<Texture2D> windows;
-        public List<Texture2D> windowDefs;
+        public List<WindowTexture> windowDefs;
         public List<string> loadedScenes;
         private String _filePath = "";
         public Dictionary<string, int> knownObjects;
@@ -131,8 +130,7 @@ namespace FFPR_ColoredWindows.Main
                     targetGobs.Add("Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view");
                 }
                 windows = new List<Texture2D>();
-                windowDefs = new List<Texture2D>();
-                spriteDatas = new List<SpriteData>();
+                windowDefs = new List<WindowTexture>();
                 loadedScenes = new List<string>();
                 knownObjects = new Dictionary<string, int>();
                 List<string> texListDel = new List<string>();
@@ -143,14 +141,15 @@ namespace FFPR_ColoredWindows.Main
                         Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
                         tex.hideFlags = HideFlags.HideAndDontSave;
                         ModComponent.Log.LogInfo($"Loaded texture:{_filePath + name + ".png"}");
+                        WindowTexture wTex = new WindowTexture(EntryPoint.Instance.Config, name, tex);
                         if (File.Exists(_filePath + name + ".spriteData"))
                         {
                             SpriteData sd = new SpriteData(File.ReadAllLines(_filePath + name + ".spriteData"), name);
-                            spriteDatas.Add(sd);
                             tex.wrapMode = sd.hasWrap ? sd.wrapMode : tex.wrapMode;
+                            wTex.SpriteData = sd;
 
                         }
-                        windowDefs.Add(tex);
+                        windowDefs.Add(wTex);
                     }catch(Exception ex)
                     {
                         ModComponent.Log.LogError($"Unable to load texture: {ex}");
@@ -162,12 +161,13 @@ namespace FFPR_ColoredWindows.Main
                 {
                     textureList.Remove(name);
                 }
-                foreach (Texture2D tex in windowDefs)
+                foreach (WindowTexture tex in windowDefs)
                 {
                     //create a copy to be edited
-                    Texture2D nTex = new Texture2D(tex.width, tex.height) { name = tex.name, filterMode = FilterMode.Point };
+                    Texture2D nTex = new Texture2D(tex.Width, tex.Height) { name = tex.Name, filterMode = FilterMode.Point };
                     nTex.hideFlags = HideFlags.HideAndDontSave;
-                    Graphics.CopyTexture(tex, nTex);
+                    nTex.SetPixels(tex.GetPixels());
+                    nTex.Apply();
                     windows.Add(nTex);
                 }
                 RecolorTextures();
@@ -227,20 +227,7 @@ namespace FFPR_ColoredWindows.Main
             }
             return newTex;
         }*/
-        public void TintTexture(Texture2D replace, Color[] cols, Color tint, float factor)
-        {
-            //this is only to be used on textures we generate
-            Color[] colcheck = replace.GetPixels();
-            if (!(colcheck.Length == cols.Length)) return;
-            for (int i = 0; i < cols.Length; ++i)
-            {
-                float a = cols[i].a;
-                cols[i] = Color.Lerp(cols[i], tint, factor);
-                cols[i].a = a;
-            }
-            replace.SetPixels(cols);
-            replace.Apply();
-        }
+
         public static Texture2D ReadTextureFromFile(String fullPath,String Name)
         {
             try
@@ -265,26 +252,9 @@ namespace FFPR_ColoredWindows.Main
             {
                 foreach (Texture2D tex in windows)
                 {
-                    //ModComponent.Log.LogInfo(tex.name);
-                    if (tex.name == "UI_Common_WindowFrame01")
-                    {
-                        //ModComponent.Log.LogInfo(ModComponent.Instance.Config.Window.BorderColor.ToString());
-
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.BRColor, ModComponent.Config.Window.BorderFactor.Value);
-                    }
-                    else if (tex.name == "UI_Common_ATBgauge02")
-                    {
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.ATBFill, ModComponent.Config.Window.ATBFillingFactor.Value);
-                    }
-                    else if (tex.name == "UI_Common_ATBgauge03")
-                    {
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.ATBFull, ModComponent.Config.Window.ATBFullFactor.Value);
-                    }
-                    else
-                    {
-                        //ModComponent.Log.LogInfo("Is Background");
-                        TintTexture(tex, windowDefs.Find(x => x.name == tex.name).GetPixels(), ModComponent.Config.Window.BGColor, ModComponent.Config.Window.BackgroundFactor.Value);
-                    }
+                    WindowTexture wTex = windowDefs.Find(x => x.Name == tex.name);
+                    tex.SetPixels(wTex.GetPixels());
+                    tex.Apply();
                 }
 
             }
@@ -300,11 +270,12 @@ namespace FFPR_ColoredWindows.Main
             {
                 Sprite original = image.sprite;
                 //check for overriding spriteData
-                bool hasSD = spriteDatas.Exists(x => x.name == image.sprite.texture.name);
-                //ModComponent.Log.LogInfo(hasSD);
+                WindowTexture wt = windowDefs.Find(x => x.Name == image.sprite.texture.name);
+                bool hasSD = (wt.SpriteData != null);
+                ModComponent.Log.LogInfo(hasSD);
                 if (hasSD)
                 {
-                    SpriteData sd = spriteDatas.Find(x => x.name == image.sprite.texture.name);
+                    SpriteData sd = wt.SpriteData;
                     //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
                     Rect r = sd.hasRect ? sd.rect : original.rect;
                     Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
@@ -316,6 +287,7 @@ namespace FFPR_ColoredWindows.Main
                 }
                 else
                 {
+
                     image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
 
                 }

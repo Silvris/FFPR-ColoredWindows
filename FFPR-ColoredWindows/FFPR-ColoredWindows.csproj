@@ -133,6 +133,7 @@
     <Compile Include="SpriteData.cs" />
     <Compile Include="TextPatches.cs" />
     <Compile Include="WindowPainter.cs" />
+    <Compile Include="WindowTexture.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

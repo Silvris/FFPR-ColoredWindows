@@ -37,13 +37,13 @@ namespace FFPR_ColoredWindows
                         }
                         List<GameObject> all = ModComponent.GetAllChildren(gob);
                         all.Insert(0, gob);
-                        ModComponent.Log.LogInfo(all.Count);
+                        //ModComponent.Log.LogInfo(all.Count);
                         foreach (GameObject go in all)
                         {
                             Image img = go.GetComponent<Image>();
                             if (img != null)
                             {
-                                ModComponent.Log.LogInfo(img.mainTexture.name);
+                                //ModComponent.Log.LogInfo(img.mainTexture.name);
                                 if (ModComponent.Instance.Painter.textureList.Contains(img.mainTexture.name))
                                 {
                                     ModComponent.Log.LogInfo("Replaced sprite");

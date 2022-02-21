@@ -21,6 +21,11 @@ SpriteData exposes the following parameters:
 * Type = Image parameter that determines how the Sprite should be displayed - options are Simple, Sliced, Tiled, Filled
 * WrapMode = Texture2D parameter that defines wrapping on the texture - options are Clamp, Repeat, Mirror, MirrorOnce
 
+# Paletted Images
+Images can be told to use palettes by setting RecolorMode to UsePalette. Images that are created for paletted mode should consist of 8 colors (not including transparency): red, green, blue, cyan, magenta, yellow, white, and black. The color that replace each can be defined in the config section for that texture.
+
+Colors can be in either 0-1 format separated by comments, or in #RRGGBBAA hex color format.
+
 # Credits:
 * Faospark - for testing and providing me with the edited gradients to bundle with the dll
 * The BepInEx Official Discord Server - for answering all of my dumb Unity questions

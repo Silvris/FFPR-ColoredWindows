@@ -22,14 +22,14 @@ namespace FFPR_ColoredWindows
         //it's like, 1, 0.9, 0.1
         private readonly static List<Color> ReferenceColors = new List<Color> { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, new Color(1,1,0), Color.white, Color.black };
         private ConfigFile Config { get; set; }
-        private ConfigEntry<Color> Color1 { get; set; }
-        private ConfigEntry<Color> Color2 { get; set; }
-        private ConfigEntry<Color> Color3 { get; set; }
-        private ConfigEntry<Color> Color4 { get; set; }
-        private ConfigEntry<Color> Color5 { get; set; }
-        private ConfigEntry<Color> Color6 { get; set; }
-        private ConfigEntry<Color> Color7 { get; set; }
-        private ConfigEntry<Color> Color8 { get; set; }
+        private ConfigEntry<ColorWrapper> Color1 { get; set; }
+        private ConfigEntry<ColorWrapper> Color2 { get; set; }
+        private ConfigEntry<ColorWrapper> Color3 { get; set; }
+        private ConfigEntry<ColorWrapper> Color4 { get; set; }
+        private ConfigEntry<ColorWrapper> Color5 { get; set; }
+        private ConfigEntry<ColorWrapper> Color6 { get; set; }
+        private ConfigEntry<ColorWrapper> Color7 { get; set; }
+        private ConfigEntry<ColorWrapper> Color8 { get; set; }
         private ConfigEntry<float> TintFactor { get; set; }
         private ConfigEntry<RecolorMode> RecolorMode {get;set;}
         private SpriteData spriteData = null;
@@ -47,14 +47,14 @@ namespace FFPR_ColoredWindows
             TextureBase = baseTex;
             TextureBase.name = name;
             RecolorMode = Config.Bind(new ConfigDefinition(Name, nameof(RecolorMode)), FFPR_ColoredWindows.RecolorMode.TintBase, new ConfigDescription("The mode to use when recoloring this texture. \n Tint: the original texture will be tinted based on a chosen color. \n Palette: the pixels of the image will be replaced based on a chosen palette."));
-            Color1 = Config.Bind(new ConfigDefinition(Name, nameof(Color1)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the red pixels of the texture in palette mode. \n\n For tint mode, this will be the color the texture is tinted with."));
-            Color2 = Config.Bind(new ConfigDefinition(Name, nameof(Color2)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the green pixels of the texture in palette mode."));
-            Color3 = Config.Bind(new ConfigDefinition(Name, nameof(Color3)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the blue pixels of the texture in palette mode."));
-            Color4 = Config.Bind(new ConfigDefinition(Name, nameof(Color4)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the cyan pixels of the texture in palette mode."));
-            Color5 = Config.Bind(new ConfigDefinition(Name, nameof(Color5)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the magenta pixels of the texture in palette mode."));
-            Color6 = Config.Bind(new ConfigDefinition(Name, nameof(Color6)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the yellow pixels of the texture in palette mode."));
-            Color7 = Config.Bind(new ConfigDefinition(Name, nameof(Color7)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the white pixels of the texture in palette mode."));
-            Color8 = Config.Bind(new ConfigDefinition(Name, nameof(Color8)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the black pixels of the texture in palette mode."));
+            Color1 = Config.Bind(new ConfigDefinition(Name, nameof(Color1)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the red pixels of the texture in palette mode. \nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor tint mode, this will be the color the texture is tinted with."));
+            Color2 = Config.Bind(new ConfigDefinition(Name, nameof(Color2)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the green pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color3 = Config.Bind(new ConfigDefinition(Name, nameof(Color3)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the blue pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color4 = Config.Bind(new ConfigDefinition(Name, nameof(Color4)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the cyan pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color5 = Config.Bind(new ConfigDefinition(Name, nameof(Color5)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the magenta pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color6 = Config.Bind(new ConfigDefinition(Name, nameof(Color6)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the yellow pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color7 = Config.Bind(new ConfigDefinition(Name, nameof(Color7)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the white pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color8 = Config.Bind(new ConfigDefinition(Name, nameof(Color8)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the black pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
             TintFactor = Config.Bind(new ConfigDefinition(Name, nameof(TintFactor)), 0.33f, new ConfigDescription("The strength of the tinting between the original texture and chosen color, where 0 is the unedited texture, while 1 is full chosen color. \n Note that transparency will be maintained from the original image. \n This has no effect when not in tint mode."));
             
             RecolorMode.SettingChanged += wc_SettingsChanged;
@@ -69,9 +69,9 @@ namespace FFPR_ColoredWindows
             TintFactor.SettingChanged += wc_SettingsChanged;
         }
 
-        private List<Color> ColorsList => new List<Color> { Color1.Value, Color2.Value, Color3.Value, Color4.Value, Color5.Value, Color6.Value, Color7.Value, Color8.Value };
+        private List<Color> ColorsList => new List<Color> { Color1.Value.color, Color2.Value.color, Color3.Value.color, Color4.Value.color, Color5.Value.color, Color6.Value.color, Color7.Value.color, Color8.Value.color };
         private float tintFactor => TintFactor.Value;
-        private Color tintColor => Color1.Value;
+        private Color tintColor => Color1.Value.color;
         private RecolorMode mode => RecolorMode.Value;
         public Color[] TintTexture()
         {

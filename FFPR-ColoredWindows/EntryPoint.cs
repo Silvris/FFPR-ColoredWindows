@@ -10,7 +10,7 @@ using UnityEngine;
 namespace FFPR_ColoredWindows
 {
 
-    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.2.0.0")]
+    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.3.0.0")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
     [BepInProcess("FINAL FANTASY III.exe")]
@@ -46,7 +46,7 @@ namespace FFPR_ColoredWindows
             try
             {
                 Log.LogInfo("Patching methods...");
-                Harmony harmony = new Harmony("silvris.ffpr.atb_fix");
+                Harmony harmony = new Harmony("silvris.ffpr.colored_windows");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
             catch (Exception ex)

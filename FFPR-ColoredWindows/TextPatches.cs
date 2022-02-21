@@ -10,6 +10,7 @@ using UnityEngine.UI;
 
 namespace FFPR_ColoredWindows.IL2CPP
 {
+    /*
     [HarmonyPatch(typeof(SaveContentController), nameof(SaveContentController.SetFocus))]
     class SaveContentView_SetFocus
     {
@@ -96,5 +97,5 @@ namespace FFPR_ColoredWindows.IL2CPP
                 }
             }
         }
-    }
+    }*/
 }

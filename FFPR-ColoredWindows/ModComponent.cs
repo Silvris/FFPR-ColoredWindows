@@ -7,6 +7,7 @@ using IntPtr = System.IntPtr;
 using Logger = BepInEx.Logging.Logger;
 using System.Linq;
 using System.Collections.Generic;
+using Last.Management;
 
 namespace FFPR_ColoredWindows.IL2CPP
 {
@@ -14,8 +15,6 @@ namespace FFPR_ColoredWindows.IL2CPP
     {
         public static ModComponent Instance { get; private set; }
         public static ManualLogSource Log { get; private set; }
-        public static string[] atbGames = { "FINAL FANTASY IV", "FINAL FANTASY V", "FINAL FANTASY VI" };
-        public static string Game { get; private set; }
         public static bool isATB { get; private set; }
         public static Configuration Config { get; private set; }
         [field: NonSerialized]public WindowPainter Painter { get; private set; }
@@ -29,8 +28,7 @@ namespace FFPR_ColoredWindows.IL2CPP
             try
             {
                 Instance = this;
-                Game = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-                isATB = atbGames.Contains(Game);
+                isATB = SystemConfig.Instance().BattleType == BattleType.ATB;
                 Config = new Configuration();
                 Painter = new WindowPainter();
                 Log.LogMessage($"[{nameof(ModComponent)}].{nameof(Awake)}: Processed successfully.");

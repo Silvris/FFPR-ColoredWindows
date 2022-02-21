@@ -272,7 +272,7 @@ namespace FFPR_ColoredWindows.Main
                 //check for overriding spriteData
                 WindowTexture wt = windowDefs.Find(x => x.Name == image.sprite.texture.name);
                 bool hasSD = (wt.SpriteData != null);
-                ModComponent.Log.LogInfo(hasSD);
+                //ModComponent.Log.LogInfo(hasSD);
                 if (hasSD)
                 {
                     SpriteData sd = wt.SpriteData;

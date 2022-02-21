@@ -46,7 +46,7 @@ namespace FFPR_ColoredWindows
                                 //ModComponent.Log.LogInfo(img.mainTexture.name);
                                 if (ModComponent.Instance.Painter.textureList.Contains(img.mainTexture.name))
                                 {
-                                    ModComponent.Log.LogInfo("Replaced sprite");
+                                    //ModComponent.Log.LogInfo("Replaced sprite");
                                     ModComponent.Instance.Painter.SetImageSprite(img);
                                 }
                             }

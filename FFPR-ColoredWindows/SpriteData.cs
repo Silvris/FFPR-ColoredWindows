@@ -46,7 +46,7 @@ namespace FFPR_ColoredWindows
                     ModComponent.Log.LogWarning($"SpriteData [{name}]: Invalid entry (unable to distinguish key)");
                     return;
                 }
-                ModComponent.Log.LogInfo(kvp[0].ToLower());
+                //ModComponent.Log.LogInfo(kvp[0].ToLower());
                 switch (kvp[0].ToLower())
                 {
                     case "rect":
@@ -84,7 +84,7 @@ namespace FFPR_ColoredWindows
             rect.y = Convert.ToSingle(vals[1]);
             rect.width = Convert.ToSingle(vals[2]);
             rect.height = Convert.ToSingle(vals[3]);
-            ModComponent.Log.LogInfo($"{rect.x} {rect.y} {rect.width} {rect.height}");
+            //ModComponent.Log.LogInfo($"{rect.x} {rect.y} {rect.width} {rect.height}");
             hasRect = true;
         }
         public void SetPivot(string input)
@@ -97,7 +97,7 @@ namespace FFPR_ColoredWindows
             }
             pivot.x = Convert.ToSingle(vals[0]);
             pivot.y = Convert.ToSingle(vals[1]);
-            ModComponent.Log.LogInfo($"{pivot.x} {pivot.y}");
+            //ModComponent.Log.LogInfo($"{pivot.x} {pivot.y}");
             hasPivot = true;
         }
         public void SetBorder(string input)
@@ -112,7 +112,7 @@ namespace FFPR_ColoredWindows
             border.y = Convert.ToSingle(vals[1]);
             border.z = Convert.ToSingle(vals[2]);
             border.w = Convert.ToSingle(vals[3]);
-            ModComponent.Log.LogInfo($"{border.x} {border.y} {border.z} {border.w}");
+            //ModComponent.Log.LogInfo($"{border.x} {border.y} {border.z} {border.w}");
             hasBorder = true;
         }
         public void SetType(string input)
@@ -139,7 +139,7 @@ namespace FFPR_ColoredWindows
                     ModComponent.Log.LogInfo($"SpriteData [{name}]: Invalid type: {input}.");
                     break;
             }
-            ModComponent.Log.LogInfo(type);
+            //ModComponent.Log.LogInfo(type);
         }
         public void SetWrap(string input)
         {
@@ -165,7 +165,7 @@ namespace FFPR_ColoredWindows
                     ModComponent.Log.LogInfo($"SpriteData [{name}]: Invalid wrap mode: {input}.");
                     break;
             }
-            ModComponent.Log.LogInfo(type);
+            //ModComponent.Log.LogInfo(type);
         }
     }
 }

@@ -12,7 +12,8 @@ namespace FFPR_ColoredWindows
     public enum RecolorMode
     {
         TintBase = 0,
-        UsePalette = 1
+        UsePalette = 1,
+        TintGradient = 2
     }
     public class WindowTexture
     {
@@ -22,19 +23,22 @@ namespace FFPR_ColoredWindows
         //it's like, 1, 0.9, 0.1
         private readonly static List<Color> ReferenceColors = new List<Color> { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, new Color(1,1,0), Color.white, Color.black };
         private ConfigFile Config { get; set; }
-        private ConfigEntry<ColorWrapper> Color1 { get; set; }
-        private ConfigEntry<ColorWrapper> Color2 { get; set; }
-        private ConfigEntry<ColorWrapper> Color3 { get; set; }
-        private ConfigEntry<ColorWrapper> Color4 { get; set; }
-        private ConfigEntry<ColorWrapper> Color5 { get; set; }
-        private ConfigEntry<ColorWrapper> Color6 { get; set; }
-        private ConfigEntry<ColorWrapper> Color7 { get; set; }
-        private ConfigEntry<ColorWrapper> Color8 { get; set; }
+        private ConfigEntry<Color> Color1 { get; set; }
+        private ConfigEntry<Color> Color2 { get; set; }
+        private ConfigEntry<Color> Color3 { get; set; }
+        private ConfigEntry<Color> Color4 { get; set; }
+        private ConfigEntry<Color> Color5 { get; set; }
+        private ConfigEntry<Color> Color6 { get; set; }
+        private ConfigEntry<Color> Color7 { get; set; }
+        private ConfigEntry<Color> Color8 { get; set; }
         private ConfigEntry<float> TintFactor { get; set; }
         private ConfigEntry<RecolorMode> RecolorMode {get;set;}
         private SpriteData spriteData = null;
         public SpriteData SpriteData { get => spriteData; set => spriteData = value; }
         private Texture2D TextureBase { get; set; }
+        private Texture2D grad1 { get; set; }
+        private Texture2D grad2 { get; set; }
+        private Texture2D gradOut { get; set; }
         private string _Name = "";
         public string Name { get => _Name; set => _Name = value; }
         public int Width => TextureBase.width;
@@ -47,15 +51,15 @@ namespace FFPR_ColoredWindows
             TextureBase = baseTex;
             TextureBase.name = name;
             RecolorMode = Config.Bind(new ConfigDefinition(Name, nameof(RecolorMode)), FFPR_ColoredWindows.RecolorMode.TintBase, new ConfigDescription("The mode to use when recoloring this texture. \n Tint: the original texture will be tinted based on a chosen color. \n Palette: the pixels of the image will be replaced based on a chosen palette."));
-            Color1 = Config.Bind(new ConfigDefinition(Name, nameof(Color1)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the red pixels of the texture in palette mode. \nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor tint mode, this will be the color the texture is tinted with."));
-            Color2 = Config.Bind(new ConfigDefinition(Name, nameof(Color2)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the green pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color3 = Config.Bind(new ConfigDefinition(Name, nameof(Color3)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the blue pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color4 = Config.Bind(new ConfigDefinition(Name, nameof(Color4)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the cyan pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color5 = Config.Bind(new ConfigDefinition(Name, nameof(Color5)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the magenta pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color6 = Config.Bind(new ConfigDefinition(Name, nameof(Color6)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the yellow pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color7 = Config.Bind(new ConfigDefinition(Name, nameof(Color7)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the white pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            Color8 = Config.Bind(new ConfigDefinition(Name, nameof(Color8)), new ColorWrapper(1f, 1f, 1f), new ConfigDescription("The color to replace the black pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
-            TintFactor = Config.Bind(new ConfigDefinition(Name, nameof(TintFactor)), 0.33f, new ConfigDescription("The strength of the tinting between the original texture and chosen color, where 0 is the unedited texture, while 1 is full chosen color. \n Note that transparency will be maintained from the original image. \n This has no effect when not in tint mode."));
+            Color1 = Config.Bind(new ConfigDefinition(Name, nameof(Color1)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the red pixels of the texture in palette mode. \nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor tint mode, this will be the color the texture is tinted with.\nFor gradient mode, this will be the texture in the top left."));
+            Color2 = Config.Bind(new ConfigDefinition(Name, nameof(Color2)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the green pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor gradient mode, this will be the texture in the top right."));
+            Color3 = Config.Bind(new ConfigDefinition(Name, nameof(Color3)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the blue pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor gradient mode, this will be the texture in the bottom left."));
+            Color4 = Config.Bind(new ConfigDefinition(Name, nameof(Color4)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the cyan pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color).\nFor gradient mode, this will be the texture in the bottom right."));
+            Color5 = Config.Bind(new ConfigDefinition(Name, nameof(Color5)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the magenta pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color6 = Config.Bind(new ConfigDefinition(Name, nameof(Color6)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the yellow pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color7 = Config.Bind(new ConfigDefinition(Name, nameof(Color7)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the white pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            Color8 = Config.Bind(new ConfigDefinition(Name, nameof(Color8)), new Color(1f, 1f, 1f), new ConfigDescription("The color to replace the black pixels of the texture in palette mode.\nFormat can be either R,G,B,A (from 0 to 1) or #RRGGBBAA (hex color)."));
+            TintFactor = Config.Bind(new ConfigDefinition(Name, nameof(TintFactor)), 0f, new ConfigDescription("The strength of the tinting between the original texture and chosen color, where 0 is the unedited texture, while 1 is full chosen color. \n Note that transparency will be maintained from the original image. \n This has no effect when not in tint (base or gradient) mode."));
             
             RecolorMode.SettingChanged += wc_SettingsChanged;
             Color1.SettingChanged += wc_SettingsChanged;
@@ -67,11 +71,17 @@ namespace FFPR_ColoredWindows
             Color7.SettingChanged += wc_SettingsChanged;
             Color8.SettingChanged += wc_SettingsChanged;
             TintFactor.SettingChanged += wc_SettingsChanged;
+            gradOut = new Texture2D(Width, Height);
+            gradOut.hideFlags = HideFlags.HideAndDontSave;
+            grad1 = new Texture2D(Width, Height);
+            grad1.hideFlags = HideFlags.HideAndDontSave;
+            grad2 = new Texture2D(Width, Height);
+            grad2.hideFlags = HideFlags.HideAndDontSave;
         }
 
-        private List<Color> ColorsList => new List<Color> { Color1.Value.color, Color2.Value.color, Color3.Value.color, Color4.Value.color, Color5.Value.color, Color6.Value.color, Color7.Value.color, Color8.Value.color };
+        private List<Color> ColorsList => new List<Color> { Color1.Value, Color2.Value, Color3.Value, Color4.Value, Color5.Value, Color6.Value, Color7.Value, Color8.Value};
         private float tintFactor => TintFactor.Value;
-        private Color tintColor => Color1.Value.color;
+        private Color tintColor => Color1.Value;
         private RecolorMode mode => RecolorMode.Value;
         public Color[] TintTexture()
         {
@@ -119,16 +129,57 @@ namespace FFPR_ColoredWindows
             }
             return cols;
         }
-
+        public Texture2D GenerateGradientTexture()
+        {
+            //first generate the two base gradients
+            for(int x = 0; x < Width; x++)
+            {
+                for(int y = 0; y < Height; y++)
+                {
+                    float power = (float)y / (float)(Height - 1);
+                    grad1.SetPixel(x, y, Color.Lerp(Color3.Value, Color1.Value, power));
+                    grad2.SetPixel(x, y, Color.Lerp(Color4.Value, Color2.Value, power));//seems backwards, but Unity has 0,0 as bottom left I believe
+                }
+            }
+            //don't forget to apply lol
+            grad1.Apply();
+            grad2.Apply();
+            //now final gradient
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    float power = (float)x / (float)(Width - 1);
+                    gradOut.SetPixel(x, y, Color.Lerp(grad1.GetPixel(x,y), grad2.GetPixel(x,y), power));
+                }
+            }
+            gradOut.Apply();
+            return gradOut;
+        }
+        public Color[] TintGradientTexture()
+        {
+            Color[] Gradient = GenerateGradientTexture().GetPixels();
+            Color[] cols = TextureBase.GetPixels();
+            for (int i = 0; i < cols.Length; ++i)
+            {
+                float a = cols[i].a;
+                cols[i] = Color.Lerp(cols[i], Gradient[i], tintFactor);
+                cols[i].a = a;
+            }
+            return cols;
+        }
         public Color[] GetPixels()
         {
-            if(mode == FFPR_ColoredWindows.RecolorMode.UsePalette)
+            switch (mode)
             {
-                return PaletteTexture();
-            }
-            else
-            {
-                return TintTexture();
+                case FFPR_ColoredWindows.RecolorMode.TintBase:
+                    return TintTexture();
+                case FFPR_ColoredWindows.RecolorMode.UsePalette:
+                    return PaletteTexture();
+                case FFPR_ColoredWindows.RecolorMode.TintGradient:
+                    return TintGradientTexture();
+                default:
+                    return TintTexture();//should be impossible
             }
         }
         public static void wc_SettingsChanged(object sender, EventArgs e)

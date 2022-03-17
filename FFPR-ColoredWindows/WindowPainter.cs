@@ -30,6 +30,12 @@ namespace FFPR_ColoredWindows.Main
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04",//no 05 as it is a speaker box
+            "UI_Touch_Battle_Icon_Active01",
+            "UI_Touch_Battle_Icon_Auto",
+            "UI_Common_ATBgauge01",
+            "UI_Common_ATBgauge02",
+            "UI_Common_ATBgauge03", //since Memoria added an option to use ATB in non-ATB games, I'm just gonna remove the game check
+            "UI_Common_ATBgauge04"
 
         };
         public List<string> targetGobs = new List<string> {// as a side note, if you were somehow to get the game to load in touch mode, none of this would work
@@ -102,7 +108,19 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Common/UI/Key/SoundPlayer/sound_player_base_controller",
             "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerydetails_base",
             "Assets/GameAssets/Common/UI/Key/ExtraGallery/gallerytop_base",
-            "Assets/GameAssets/Common/UI/Key/SaveWindow/Prefabs/save_window"
+            "Assets/GameAssets/Common/UI/Key/SaveWindow/Prefabs/save_window",
+            "Assets/GameAssets/Common/UI/Key/Warehouse/Prefabs/trade_popup",
+            "Assets/GameAssets/Common/UI/Key/Warehouse/Prefabs/warehouse_base",
+            "Assets/GameAssets/Common/UI/Touch/KeyWord/Prefabs/keyword_info_base",
+            "Assets/GameAssets/Common/UI/Key/Colosseum/challenger_character_content",
+            "Assets/GameAssets/Common/UI/Key/Colosseum/colosseum_base",
+            "Assets/GameAssets/Common/UI/Key/Colosseum/colosseum_challenger_select",
+            "Assets/GameAssets/Common/UI/Key/Colosseum/colosseum_item_select",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/menu_parent",
+            "Assets/GameAssets/Common/UI/Key/Field/Prefabs/field_help",
+            "Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/player_info_content",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view_ATB",
+            "Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view"
 
         };
         public List<Texture2D> windows;
@@ -110,6 +128,10 @@ namespace FFPR_ColoredWindows.Main
         public List<string> loadedScenes;
         private String _filePath = "";
         public Dictionary<string, int> knownObjects;
+        private GUISkin skin;
+        private bool isToggled;
+        private bool isHeld;
+        private FontManager fontManager { get; set; }
         public WindowPainter()
         {
             try
@@ -117,18 +139,6 @@ namespace FFPR_ColoredWindows.Main
                 Instance = this;
                 Assembly thisone = Assembly.GetExecutingAssembly();
                 _filePath = Path.GetDirectoryName(thisone.Location) + "/ColoredWindows/";
-                
-                if (ModComponent.isATB)
-                {
-                    targetGobs.Add("Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view_ATB");
-                    targetGobs.Add("Assets/GameAssets/Serial/Res/UI/Key/Battle/Prefabs/player_info_content");
-                    textureList.Add("UI_Common_ATBgauge02");
-                    textureList.Add("UI_Common_ATBgauge03");
-                }
-                else
-                {
-                    targetGobs.Add("Assets/GameAssets/Common/UI/Key/Battle/Prefabs/pause_view");
-                }
                 windows = new List<Texture2D>();
                 windowDefs = new List<WindowTexture>();
                 loadedScenes = new List<string>();
@@ -150,7 +160,13 @@ namespace FFPR_ColoredWindows.Main
 
                         }
                         windowDefs.Add(wTex);
-                    }catch(Exception ex)
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        ModComponent.Log.LogError($"Unable to load texture \"{name}\" as it was not found.");
+                        texListDel.Add(name);
+                    }
+                    catch (Exception ex)
                     {
                         ModComponent.Log.LogError($"Unable to load texture: {ex}");
                         texListDel.Add(name);
@@ -171,6 +187,9 @@ namespace FFPR_ColoredWindows.Main
                     windows.Add(nTex);
                 }
                 RecolorTextures();
+                //GUI initialization
+                skin = new GUISkin();
+
                 ModComponent.Log.LogInfo("Window Painter initialized.");
             }
             catch (Exception ex)
@@ -182,7 +201,6 @@ namespace FFPR_ColoredWindows.Main
         {
             ModComponent.Log.LogInfo($"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
         }
-        
         /* commenting out since they're not needed as of now, may become of use later
         public Texture2D RemoveTrim(Texture2D source)
         {
@@ -301,12 +319,46 @@ namespace FFPR_ColoredWindows.Main
             }
 
         }
+        /*
+        public void RenderGUI(int windowID)
+        {
 
+        }
+        public void OnGUI()
+        {
+            if (isToggled)
+            {
+                GUI.Window(0, new Rect(400, 400, 400, 400), (GUI.WindowFunction)RenderGUI,"");
+            }
+        }*/
         public void Update()
         {
             try
             {
                 //there is nothing to wait for anymore, perish
+                //there is now something to wait for
+                /*
+                if(fontManager == null)
+                {
+                    fontManager = FontManager.Instance;
+                    if (fontManager == null) return;
+                }
+                if (fontManager.initialized)
+                {
+                    skin.font = fontManager.GetMainFontInstance();
+                }
+                if (Input.GetKeyDown(ModComponent.Config.Window.AccessGUI))
+                {
+                    if (!isHeld)
+                    {
+                        isToggled = true;
+                        isHeld = true;
+                    }
+                }
+                if (Input.GetKeyUp(ModComponent.Config.Window.AccessGUI))
+                {
+                    isHeld = false;
+                }*/
             }
             catch(Exception ex)
             {

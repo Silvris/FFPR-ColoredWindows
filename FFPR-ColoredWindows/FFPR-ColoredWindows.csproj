@@ -56,6 +56,10 @@
       <HintPath>$(GamePath)\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="BepInExConfigManager.Il2Cpp">
+      <Private>False</Private>
+      <HintPath>$(GamePath)\BepInEx\plugins\BepInExConfigManager.Il2Cpp.dll</HintPath>
+    </Reference>
     <Reference Include="Il2Cppmscorlib">
       <HintPath>$(GamePath)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>

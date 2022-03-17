@@ -32,6 +32,7 @@ namespace FFPR_ColoredWindows.Main
             "UI_Common_WindowFrame04",//no 05 as it is a speaker box
             "UI_Touch_Battle_Icon_Active01",
             "UI_Touch_Battle_Icon_Auto",
+            "UI_Touch_Common_Icon_Back01_s",
             "UI_Common_ATBgauge01",
             "UI_Common_ATBgauge02",
             "UI_Common_ATBgauge03", //since Memoria added an option to use ATB in non-ATB games, I'm just gonna remove the game check
@@ -128,9 +129,6 @@ namespace FFPR_ColoredWindows.Main
         public List<string> loadedScenes;
         private String _filePath = "";
         public Dictionary<string, int> knownObjects;
-        private GUISkin skin;
-        private bool isToggled;
-        private bool isHeld;
         private FontManager fontManager { get; set; }
         public WindowPainter()
         {
@@ -161,7 +159,7 @@ namespace FFPR_ColoredWindows.Main
                         }
                         windowDefs.Add(wTex);
                     }
-                    catch (FileNotFoundException ex)
+                    catch (FileNotFoundException)
                     {
                         ModComponent.Log.LogError($"Unable to load texture \"{name}\" as it was not found.");
                         texListDel.Add(name);
@@ -187,8 +185,6 @@ namespace FFPR_ColoredWindows.Main
                     windows.Add(nTex);
                 }
                 RecolorTextures();
-                //GUI initialization
-                skin = new GUISkin();
 
                 ModComponent.Log.LogInfo("Window Painter initialized.");
             }
@@ -296,7 +292,7 @@ namespace FFPR_ColoredWindows.Main
                     SpriteData sd = wt.SpriteData;
                     //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
                     Rect r = sd.hasRect ? sd.rect : original.rect;
-                    Vector2 p = sd.hasPivot ? sd.pivot : original.pivot;
+                    Vector2 p = sd.hasPivot ? sd.pivot : new Vector2(original.pivot.x / original.texture.width,original.pivot.y / original.texture.height);
                     Vector4 b = sd.hasBorder ? sd.border : original.border;
                     Image.Type t = sd.hasType ? sd.type : image.type;
                     image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);

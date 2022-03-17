@@ -30,9 +30,9 @@ namespace FFPR_ColoredWindows.Main
             "UI_Common_WindowFrame02",
             "UI_Common_WindowFrame03",
             "UI_Common_WindowFrame04",//no 05 as it is a speaker box
-            "UI_Touch_Battle_Icon_Active01",
-            "UI_Touch_Battle_Icon_Auto",
-            "UI_Touch_Common_Icon_Back01_s",
+            //"UI_Touch_Battle_Icon_Active01",
+            //"UI_Touch_Battle_Icon_Auto", //disabled since this one does not want to cooperate
+            //"UI_Touch_Common_Icon_Back01_s", 
             "UI_Common_ATBgauge01",
             "UI_Common_ATBgauge02",
             "UI_Common_ATBgauge03", //since Memoria added an option to use ATB in non-ATB games, I'm just gonna remove the game check
@@ -112,7 +112,7 @@ namespace FFPR_ColoredWindows.Main
             "Assets/GameAssets/Common/UI/Key/SaveWindow/Prefabs/save_window",
             "Assets/GameAssets/Common/UI/Key/Warehouse/Prefabs/trade_popup",
             "Assets/GameAssets/Common/UI/Key/Warehouse/Prefabs/warehouse_base",
-            "Assets/GameAssets/Common/UI/Touch/KeyWord/Prefabs/keyword_info_base",
+            "Assets/GameAssets/Common/UI/Key/KeyWord/Prefabs/keyword_info_base",
             "Assets/GameAssets/Common/UI/Key/Colosseum/challenger_character_content",
             "Assets/GameAssets/Common/UI/Key/Colosseum/colosseum_base",
             "Assets/GameAssets/Common/UI/Key/Colosseum/colosseum_challenger_select",
@@ -293,6 +293,7 @@ namespace FFPR_ColoredWindows.Main
                     //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
                     Rect r = sd.hasRect ? sd.rect : original.rect;
                     Vector2 p = sd.hasPivot ? sd.pivot : new Vector2(original.pivot.x / original.texture.width,original.pivot.y / original.texture.height);
+                    ModComponent.Log.LogInfo(p);
                     Vector4 b = sd.hasBorder ? sd.border : original.border;
                     Image.Type t = sd.hasType ? sd.type : image.type;
                     image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);
@@ -302,7 +303,7 @@ namespace FFPR_ColoredWindows.Main
                 else
                 {
 
-                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
+                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, new Vector2(original.pivot.x / original.texture.width, original.pivot.y / original.texture.height), original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
 
                 }
 

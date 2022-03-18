@@ -10,7 +10,7 @@ using UnityEngine;
 namespace FFPR_ColoredWindows
 {
 
-    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.3.0.0")]
+    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.4.0.0")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
     [BepInProcess("FINAL FANTASY III.exe")]

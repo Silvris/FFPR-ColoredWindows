@@ -54,9 +54,11 @@ namespace FFPR_ColoredWindows
                 {
                     ConvertToObject = (string s, Type t) =>
                     {
-                        if (s.StartsWith("#")) s = s.Substring(1);
                         if (string.IsNullOrEmpty(s)) throw new FormatException("Color cannot be null");
-                        if(!ColorUtility.TryParseHtmlString(s, out var o)) throw new FormatException("Color must follow #RRGGBBAA format, or match UnityEngine.color names");
+                        bool check = ColorUtility.TryParseHtmlString(s, out var o);
+                        //ModComponent.Log.LogInfo(check);
+                        //ModComponent.Log.LogInfo(o);
+                        if (!check) throw new FormatException("Color must follow #RRGGBBAA format, or match UnityEngine.color names");
                         return o;
                     },
                     ConvertToString = (object o, Type t) =>

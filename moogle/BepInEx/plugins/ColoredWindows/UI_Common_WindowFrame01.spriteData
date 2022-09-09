@@ -1,0 +1,5 @@
+Rect=[0,0,100,100]
+Pivot=[5000,5000]
+Border=[45,45,45,45]
+Type=Sliced
+WrapMode=Repeat

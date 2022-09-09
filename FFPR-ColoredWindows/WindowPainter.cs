@@ -10,12 +10,7 @@ using System.Threading.Tasks;
 using FFPR_ColoredWindows.IL2CPP;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
-using UnhollowerRuntimeLib;
-using UnityEngine.InputSystem;
-using HarmonyLib;
-using UnityEngine.SceneManagement;
-using SceneManager = UnityEngine.SceneManagement.SceneManager;
+using Syldra;
 
 namespace FFPR_ColoredWindows.Main
 {
@@ -148,12 +143,13 @@ namespace FFPR_ColoredWindows.Main
                     {
                         Texture2D tex = ReadTextureFromFile(_filePath + name + ".png", name);
                         tex.hideFlags = HideFlags.HideAndDontSave;
-                        ModComponent.Log.LogInfo($"Loaded texture:{_filePath + name + ".png"}");
+                        ModComponent.Log.LogInfo((object)$"Loaded texture:{_filePath + name + ".png"}");
                         WindowTexture wTex = new WindowTexture(EntryPoint.Instance.Config, name, tex);
                         if (File.Exists(_filePath + name + ".spriteData"))
                         {
                             SpriteData sd = new SpriteData(File.ReadAllLines(_filePath + name + ".spriteData"), name);
                             tex.wrapMode = sd.hasWrap ? sd.wrapMode : tex.wrapMode;
+                            tex.filterMode = sd.hasFilter ? sd.filterMode : tex.filterMode;
                             wTex.SpriteData = sd;
 
                         }
@@ -161,12 +157,12 @@ namespace FFPR_ColoredWindows.Main
                     }
                     catch (FileNotFoundException)
                     {
-                        ModComponent.Log.LogError($"Unable to load texture \"{name}\" as it was not found.");
+                        ModComponent.Log.LogError((object)$"Unable to load texture \"{name}\" as it was not found.");
                         texListDel.Add(name);
                     }
                     catch (Exception ex)
                     {
-                        ModComponent.Log.LogError($"Unable to load texture: {ex}");
+                        ModComponent.Log.LogError((object)$"Unable to load texture: {ex}");
                         texListDel.Add(name);
                     }
 
@@ -178,7 +174,7 @@ namespace FFPR_ColoredWindows.Main
                 foreach (WindowTexture tex in windowDefs)
                 {
                     //create a copy to be edited
-                    Texture2D nTex = new Texture2D(tex.Width, tex.Height) { name = tex.Name, filterMode = FilterMode.Point };
+                    Texture2D nTex = new Texture2D(tex.Width, tex.Height) { name = tex.Name, filterMode = tex.GetFilterMode(), wrapMode = tex.GetWrapMode() };
                     nTex.hideFlags = HideFlags.HideAndDontSave;
                     nTex.SetPixels(tex.GetPixels());
                     nTex.Apply();
@@ -190,12 +186,12 @@ namespace FFPR_ColoredWindows.Main
             }
             catch (Exception ex)
             {
-                ModComponent.Log.LogError($"[{nameof(WindowPainter)}.ctor]: {ex}");
+                ModComponent.Log.LogError((object)$"[{nameof(WindowPainter)}.ctor]: {ex}");
             }
         }
         public void OnDestroy()
         {
-            ModComponent.Log.LogInfo($"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
+            ModComponent.Log.LogInfo((object)$"[{nameof(WindowPainter)}].{nameof(OnDestroy)}()");
         }
         /* commenting out since they're not needed as of now, may become of use later
         public Texture2D RemoveTrim(Texture2D source)
@@ -274,7 +270,7 @@ namespace FFPR_ColoredWindows.Main
             }
             catch(Exception ex)
             {
-                ModComponent.Log.LogError($"[WindowPainter].[{nameof(RecolorTextures)}]:{ex}");
+                ModComponent.Log.LogError((object)$"[WindowPainter].[{nameof(RecolorTextures)}]:{ex}");
             }
         }
 
@@ -293,17 +289,18 @@ namespace FFPR_ColoredWindows.Main
                     //ModComponent.Log.LogInfo($"{sd.name} {sd.hasRect} {sd.hasPivot} {sd.hasBorder} {sd.hasType}");
                     Rect r = sd.hasRect ? sd.rect : original.rect;
                     Vector2 p = sd.hasPivot ? sd.pivot : new Vector2(original.pivot.x / original.texture.width,original.pivot.y / original.texture.height);
-                    ModComponent.Log.LogInfo(p);
+                    //ModComponent.Log.LogInfo(p);
                     Vector4 b = sd.hasBorder ? sd.border : original.border;
-                    Image.Type t = sd.hasType ? sd.type : image.type;
-                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, SpriteMeshType.Tight, b);
+                    Image.Type t = (Image.Type)(sd.HasCustomData("type") ? Enum.Parse(typeof(Image.Type),sd.GetCustomData("type"),true) : image.type);
+                    SpriteMeshType meshType = (t == Image.Type.Tiled) ? SpriteMeshType.FullRect : SpriteMeshType.Tight;
+                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), r, p, original.pixelsPerUnit, 0, meshType, b);
                     image.type = t;
 
                 }
                 else
                 {
 
-                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, new Vector2(original.pivot.x / original.texture.width, original.pivot.y / original.texture.height), original.pixelsPerUnit, 0, SpriteMeshType.Tight, original.border);
+                    image.sprite = Sprite.Create(windows.Find(x => x.name == image.sprite.texture.name), original.rect, original.pivot, original.pixelsPerUnit, 0, (original.packingMode == SpritePackingMode.Rectangle) ? SpriteMeshType.FullRect : SpriteMeshType.Tight, original.border);
 
                 }
 
@@ -359,7 +356,7 @@ namespace FFPR_ColoredWindows.Main
             }
             catch(Exception ex)
             {
-                ModComponent.Log.LogError($"[{nameof(WindowPainter)}.{nameof(Update)}]: {ex}");
+                ModComponent.Log.LogError((object)$"[{nameof(WindowPainter)}.{nameof(Update)}]: {ex}");
             }
         }
     }

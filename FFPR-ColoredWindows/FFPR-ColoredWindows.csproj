@@ -12,10 +12,11 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173820</GameRegistryPath>
+    <GameRegistryPath>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 1173810</GameRegistryPath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry32))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">$([MSBuild]::GetRegistryValueFromView('$(GameRegistryPath)', 'InstallLocation', null, RegistryView.Registry64))</GamePath>
     <GamePath Condition="'$(GamePath)' == ''">bin\FF1</GamePath>
+    <SyldraRepo>C:\Users\Owner\Documents\GitHub\Syldra</SyldraRepo>
     <OutputPath>$(GamePath)\BepInEx\plugins\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -117,6 +118,10 @@
       <HintPath>$(GamePath)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Syldra">
+      <HintPath>$(SyldraRepo)\Syldra\bin\Release\Syldra.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -134,7 +139,6 @@
     <Compile Include="ModComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager_IsLoadAssetCompleted.cs" />
-    <Compile Include="SpriteData.cs" />
     <Compile Include="TextPatches.cs" />
     <Compile Include="WindowPainter.cs" />
     <Compile Include="WindowTexture.cs" />

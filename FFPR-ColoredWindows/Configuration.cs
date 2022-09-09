@@ -47,34 +47,6 @@ namespace FFPR_ColoredWindows
         }
         public WindowsConfig()
         {
-            //used from Sinai's ConfigManager example
-            if (!TomlTypeConverter.CanConvert(typeof(Color)))
-                { 
-                TomlTypeConverter.AddConverter(typeof(Color), new TypeConverter()
-                {
-                    ConvertToObject = (string s, Type t) =>
-                    {
-                        if (string.IsNullOrEmpty(s)) throw new FormatException("Color cannot be null");
-                        bool check = ColorUtility.TryParseHtmlString(s, out var o);
-                        //ModComponent.Log.LogInfo(check);
-                        //ModComponent.Log.LogInfo(o);
-                        if (!check) throw new FormatException("Color must follow #RRGGBBAA format, or match UnityEngine.color names");
-                        return o;
-                    },
-                    ConvertToString = (object o, Type t) =>
-                    {
-                        var x = (Color)o;
-                        //ToHtmlStringRGBA is broken for some reason, time to go old school
-                            var r = (Byte)Mathf.Clamp(Mathf.RoundToInt(x.r * 255), 0, 255);
-                            var g = (Byte)Mathf.Clamp(Mathf.RoundToInt(x.g * 255), 0, 255);
-                            var b = (Byte)Mathf.Clamp(Mathf.RoundToInt(x.b * 255), 0, 255);
-                            var a = (Byte)Mathf.Clamp(Mathf.RoundToInt(x.a * 255), 0, 255);
-
-                            return $"#{r:X2}{g:X2}{b:X2}{a:X2}";
-                    }
-                });
-            }
-
             Config = EntryPoint.Instance.Config;
             /*
             _TextColor = Config.Bind(new ConfigDefinition(Text, "Text Color"), new Color(.91f, .91f, .91f, 1f), new ConfigDescription("The color of non-focused text in menus"));
@@ -105,15 +77,15 @@ namespace FFPR_ColoredWindows
             {
                 try
                 {
-                    log.LogInfo($"Initializing {nameof(Configuration)}");
+                    log.LogInfo((object)$"Initializing {nameof(Configuration)}");
 
                     Window = new WindowsConfig();
 
-                    log.LogInfo($"{nameof(Configuration)} initialized successfully.");
+                    log.LogInfo((object)$"{nameof(Configuration)} initialized successfully.");
                 }
                 catch (Exception ex)
                 {
-                    log.LogError($"Failed to initialize {nameof(Configuration)}: {ex}");
+                    log.LogError((object)$"Failed to initialize {nameof(Configuration)}: {ex}");
                     throw;
                 }
             }

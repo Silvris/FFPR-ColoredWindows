@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Syldra;
 
 namespace FFPR_ColoredWindows
 {
@@ -185,6 +186,25 @@ namespace FFPR_ColoredWindows
         public static void wc_SettingsChanged(object sender, EventArgs e)
         {
             ModComponent.Instance.Painter.RecolorTextures();
+        }
+
+        public FilterMode GetFilterMode()
+        {
+            if (SpriteData != null)
+            {
+                if (SpriteData.hasFilter) return SpriteData.filterMode;
+                else return FilterMode.Point;
+            }
+            else return FilterMode.Point;
+        }
+        public TextureWrapMode GetWrapMode()
+        {
+            if (SpriteData != null)
+            {
+                if (SpriteData.hasWrap) return SpriteData.wrapMode;
+                else return TextureWrapMode.Clamp;
+            }
+            else return TextureWrapMode.Clamp;
         }
     }
 }

@@ -10,7 +10,8 @@ using UnityEngine;
 namespace FFPR_ColoredWindows
 {
 
-    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.4.1.0")]
+    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.5.0.0")]
+    [BepInDependency("ffpr.Syldra")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
     [BepInProcess("FINAL FANTASY III.exe")]
@@ -27,11 +28,11 @@ namespace FFPR_ColoredWindows
             ClassInjector.RegisterTypeInIl2Cpp<ModComponent>();
             ClassInjector.RegisterTypeInIl2Cpp<ResourceManager_IsLoadAssetCompleted>();
             String name = typeof(ModComponent).FullName;
-            Log.LogInfo($"Initializing in-game singleton: {name}");
+            Log.LogInfo((object)$"Initializing in-game singleton: {name}");
             GameObject singleton = new GameObject(name);
             singleton.hideFlags = HideFlags.HideAndDontSave;
             GameObject.DontDestroyOnLoad(singleton);
-            Log.LogInfo("Adding ModComponent to singleton...");
+            Log.LogInfo((object)"Adding ModComponent to singleton...");
             ModComponent component = singleton.AddComponent<ModComponent>();
             if (component is null)
             {

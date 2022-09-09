@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Syldra;
 
 namespace FFPR_ColoredWindows
 {
@@ -35,7 +36,7 @@ namespace FFPR_ColoredWindows
                                 return;//if either are false, continue
                             }
                         }
-                        List<GameObject> all = ModComponent.GetAllChildren(gob);
+                        List<GameObject> all = Functions.GetAllChildren(gob);
                         all.Insert(0, gob);
                         //ModComponent.Log.LogInfo(all.Count);
                         foreach (GameObject go in all)

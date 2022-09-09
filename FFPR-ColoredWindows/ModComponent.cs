@@ -29,12 +29,12 @@ namespace FFPR_ColoredWindows.IL2CPP
                 Instance = this;
                 Config = new Configuration();
                 Painter = new WindowPainter();
-                Log.LogMessage($"[{nameof(ModComponent)}].{nameof(Awake)}: Processed successfully.");
+                Log.LogMessage((object)$"[{nameof(ModComponent)}].{nameof(Awake)}: Processed successfully.");
             }
             catch(Exception ex)
             {
                 _isDisabled = true;
-                Log.LogError($"[{nameof(ModComponent)}].{nameof(Awake)}(): {ex}");
+                Log.LogError((object)$"[{nameof(ModComponent)}].{nameof(Awake)}(): {ex}");
                 throw;
             }
             
@@ -52,41 +52,10 @@ namespace FFPR_ColoredWindows.IL2CPP
             catch(Exception ex)
             {
                 _isDisabled = true;
-                Log.LogError($"[{nameof(ModComponent)}].{nameof(Update)}(): {ex}");
+                Log.LogError((object)$"[{nameof(ModComponent)}].{nameof(Update)}(): {ex}");
                 throw;
             }
 
-        }
-        public static List<GameObject> GetAllChildren(GameObject obj)
-        {
-            List<GameObject> children = new List<GameObject>();
-
-            if (obj != null)
-            {
-                for (int i = 0; i < obj.transform.childCount; i++)
-                {
-                    Transform child = obj.transform.GetChild(i);
-                    if (child != null)
-                    {
-                        if (child.gameObject != null)
-                        {
-                            children.Add(child.gameObject);
-                            if (child.childCount != 0)
-                            {
-                                children.AddRange(GetAllChildren(child.gameObject));
-                            }
-                        }
-                    }
-
-
-                }
-            }
-            else
-            {
-                Log.LogWarning("Root object is null!");
-            }
-
-            return children;
         }
     }
 }

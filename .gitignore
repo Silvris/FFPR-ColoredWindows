@@ -340,4 +340,5 @@ ASALocalRun/
 healthchecksdb
 
 #Release
-*.zip
+[Mm]oogle/[Bb]epInEx/
+[Rr]elease/

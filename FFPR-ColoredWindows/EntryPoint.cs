@@ -1,16 +1,16 @@
 ﻿using BepInEx;
-using BepInEx.IL2CPP;
+using BepInEx.Unity.IL2CPP;
 using FFPR_ColoredWindows.IL2CPP;
 using HarmonyLib;
 using System;
 using System.Reflection;
-using UnhollowerRuntimeLib;
+using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
 
 namespace FFPR_ColoredWindows
 {
 
-    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.5.0.0")]
+    [BepInPlugin("silvris.ffpr.colored_windows", "Colored Windows", "2.6.0.0")]
     [BepInDependency("ffpr.Syldra")]
     [BepInProcess("FINAL FANTASY.exe")]
     [BepInProcess("FINAL FANTASY II.exe")]
